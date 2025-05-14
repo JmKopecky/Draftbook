@@ -42,7 +42,7 @@ public class WorkController {
         //retrieve work
         ArrayList<Work> works = account.getOwnedWorks(workRepository);
         for (Work work : works) {
-            if (work.toResource().equals(target)) {
+            if (("" + work.getId()).equals(target)) {
                 //found the work
                 return work;
             }
@@ -89,6 +89,19 @@ public class WorkController {
 
 
 
+    public static ArrayList<Work> getOwnedWorks(Account account, WorkRepository repository) {
+        ArrayList<Work> works = new ArrayList<>();
+        for (Work work : repository.findAll()) {
+            if (work.getAccount().getId().equals(account.getId())) {
+                works.add(work);
+            }
+        }
+        return works;
+    }
+
+
+
+
     @GetMapping("/api/works/work")
     public ResponseEntity<HashMap<String, Object>> getWork(
             @RequestParam(name = "target", required = true) String target,
@@ -106,7 +119,7 @@ public class WorkController {
                 token = node.get("token").asText();
             }
         } catch (IOException e) {
-            Log.create(e.getMessage(), "WorkController.renameWork()", "error", e);
+            Log.create(e.getMessage(), "WorkController.getWork()", "error", e);
             response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
@@ -223,7 +236,7 @@ public class WorkController {
 
 
 
-    @GetMapping("/api/works/rename")
+    @PostMapping("/api/works/rename")
     public ResponseEntity<HashMap<String, Object>> renameWork(
             @RequestParam(name = "target", required = true) String target,
             @CookieValue(value = "token", defaultValue = "null") String token,
@@ -261,7 +274,6 @@ public class WorkController {
             work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
-
         boolean result = work.changeName(newName, workRepository);
         if (result) {
             response.put("error", "none");
@@ -276,7 +288,7 @@ public class WorkController {
 
 
 
-    @GetMapping("/api/works/delete")
+    @PostMapping("/api/works/delete")
     public ResponseEntity<HashMap<String, Object>> deleteWork(
             @RequestParam(name = "target", required = true) String target,
             @CookieValue(value = "token", defaultValue = "null") String token,
@@ -320,5 +332,54 @@ public class WorkController {
             response.put("error", "delete_failed");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+    }
+
+
+
+    @PostMapping("/api/works/create")
+    public ResponseEntity<HashMap<String, Object>> createWork(
+            @CookieValue(value = "token", defaultValue = "null") String token,
+            @RequestBody String data) {
+
+        HashMap<String, Object> response = new HashMap<>();
+
+        String title;
+        //retrieve title
+        //token verification from body if applicable
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(data);
+            title = node.get("title").asText();
+            //token verification if included in request body
+            if (node.has("token")) {
+                token = node.get("token").asText();
+            }
+        } catch (IOException e) {
+            Log.create(e.getMessage(), "WorkController.createWork()", "error", e);
+            response.put("error", e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        //auth
+        Account account;
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+        } catch (Exception _) {
+            response.put("error", "unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+
+        Work work = null;
+        try {
+            work = Work.createWork(account, title, workRepository);
+        } catch (IOException e) {
+            response.put("error", "storage_exception");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        response.put("error", "none");
+        response.put("workid", work.getId());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

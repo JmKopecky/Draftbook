@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Draftbook</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <link rel="stylesheet" href="/styles/dashboard.css">
+    <link rel="stylesheet" href="/styles/header.css">
+
+    <script data-swup-reload-script src="/scripts/dashboard.js"></script>
+
+    <script src="https://unpkg.com/swup@4"></script>
+    <script src="https://unpkg.com/@swup/head-plugin@2"></script>
+    <script src="https://unpkg.com/@swup/scripts-plugin@2"></script>
+    <script data-swup-reload-script src="https://kit.fontawesome.com/2b6129ab2e.js" crossorigin="anonymous"></script>
+    <script src="/scripts/swuphooks.js"></script>
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main id="swup" class="page-content transition-fade">
+    <!-- Hero tagline idea: Got a story idea? let me help. -->
+    <!-- Don't hide the fact that this is a solo dev project -->
+
+    <div id="site-content">
+        <!--
+        What needs to be here?
+        Statistics (account-wide)
+        Security
+        Customization Profiles
+        Pricing and the ability to upgrade your pricing plan
+        Billing
+        -->
+        <div id="account-nav-sidebar">
+            <h6 class="nav-heading">Works</h6>
+            <div class="nav-item" th:classappend="${section.equals('works') ? 'active' : ''}" data-section="works" onclick="setNavPanel(this)">
+                <i class="fa-solid fa-book"></i>
+                <p>Works</p>
+            </div>
+            <div class="nav-item" th:classappend="${section.equals('statistics') ? 'active' : ''}" data-section="statistics" onclick="setNavPanel(this)">
+                <i class="fa-solid fa-square-poll-vertical"></i>
+                <p>Statistics</p>
+            </div>
+            <h6 class="nav-heading">Account</h6>
+            <div class="nav-item" th:classappend="${section.equals('security') ? 'active' : ''}" data-section="security" onclick="setNavPanel(this)">
+                <i class="fa-solid fa-lock"></i>
+                <p>Security</p>
+            </div>
+            <div class="nav-item" th:classappend="${section.equals('customization') ? 'active' : ''}" data-section="customization" onclick="setNavPanel(this)">
+                <i class="fa-solid fa-paint-roller"></i>
+                <p>Customization</p>
+            </div>
+            <div class="nav-item" th:classappend="${section.equals('premium') ? 'active' : ''}" data-section="premium" onclick="setNavPanel(this)">
+                <i class="fa-solid fa-gem"></i>
+                <p>Premium</p> <!-- todo: rebrand this to whatever we call our premium plan (idea: supporter to emphasize the small scale of the service that they are supporting) -->
+            </div>
+            <div class="nav-item" th:classappend="${section.equals('billing') ? 'active' : ''}" data-section="billing" onclick="setNavPanel(this)">
+                <i class="fa-solid fa-dollar-sign"></i>
+                <p>Billing</p>
+            </div>
+        </div>
+        <div id="account-main-content">
+            <!-- headers -->
+            <div class="content-header" data-section="works" th:style="${section.equals('works') ? 'display: flex;' : 'display: none;'}">
+                <h1>Works</h1>
+            </div>
+            <div class="content-header" data-section="statistics" th:style="${section.equals('statistics') ? 'display: flex;' : 'display: none;'}">
+                <h1>Statistics</h1>
+            </div>
+            <div class="content-header" data-section="security" th:style="${section.equals('security') ? 'display: flex;' : 'display: none;'}">
+                <h1>Security</h1>
+            </div>
+            <div class="content-header" data-section="customization" th:style="${section.equals('customization') ? 'display: flex;' : 'display: none;'}">
+                <h1>Customization</h1>
+            </div>
+            <div class="content-header" data-section="premium" th:style="${section.equals('premium') ? 'display: flex;' : 'display: none;'}">
+                <h1>Premium</h1>
+            </div>
+            <div class="content-header" data-section="billing" th:style="${section.equals('billing') ? 'display: flex;' : 'display: none;'}">
+                <h1>Billing</h1>
+            </div>
+            <!-- Works -->
+            <div class="content-tile work-display-tile" data-section="works" th:each="work:${works}" th:style="${section.equals('works') ? 'display: flex;' : 'display: none;'}"  th:data-work="${work.getId()}">
+                <form onsubmit="renameWork(this); return false;"><input class="work-title" th:value="${work.getTitle()}" readonly></form>
+                <i class="fa-solid fa-i-cursor" onclick="renameWork(this)"></i>
+                <i class="fa-solid fa-trash" onclick="deleteWork(this)"></i>
+                <button onclick="openWork(this)">Open Work</button>
+            </div>
+            <div class="content-tile" data-section="works" th:style="${section.equals('works') ? 'display: flex;' : 'display: none;'}">
+                <h3>Create New Work</h3>
+                <div id="work-new-input-container">
+                    <input placeholder="Work title" alt="work title" id="new-work-title-input">
+                    <button onclick="createWork()">Create</button>
+                </div>
+
+            </div>
+            <!-- Statistics -->
+            <div class="content-tile" data-section="statistics" th:style="${section.equals('statistics') ? 'display: flex;' : 'display: none;'}">
+                <p>Lorem ipsum dolor sit amet. Consectur apdiscing amet.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+
+</body>
+</html>

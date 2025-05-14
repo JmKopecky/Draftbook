@@ -11,6 +11,6 @@ public class DraftbookApplication {
     }
 
     public static String retrieveRoot() {
-        return System.getProperty("user.home") + "draftbook_data/";
+        return System.getProperty("user.home") + "/draftbook_data/";
     }
 }

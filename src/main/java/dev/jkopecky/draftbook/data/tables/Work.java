@@ -26,20 +26,23 @@ public class Work {
     private Account account;
 
 
-    public static void createWork(Account owner, String title, WorkRepository workRepository) throws IOException {
+    public static Work createWork(Account owner, String title, WorkRepository workRepository) throws IOException {
         Work work = new Work();
         work.setTitle(title);
         work.setAccount(owner);
+        workRepository.save(work);
         work.buildPath();
         work.createWorkFile();
         workRepository.save(work);
+        return work;
     }
 
 
 
     public void buildPath() {
-        //directory should be the user's default root, in a folder based on their name. Changing the username or work name should force a refactor after checking.
-        path = DraftbookApplication.retrieveRoot() + Util.toInternalResource(account.getUsername()) + "/works/" + id + "/";
+        //directory should be the user's default root, in a folder based on their user id. Changing the username or work name should force a refactor after checking.
+        path = DraftbookApplication.retrieveRoot() + account.getId() + "/works/" + id + "/";
+        System.out.println(path);
     }
 
 
@@ -49,6 +52,7 @@ public class Work {
             //create initial file based on title, and save the work object for data redundancy.
             ObjectMapper mapper = new ObjectMapper();
             String fullPath = path + id + ".json";
+            System.out.println(fullPath);
             Files.createDirectories(Paths.get(path));
             File file = new File(fullPath);
             mapper.writeValue(file, this);
@@ -81,7 +85,7 @@ public class Work {
                 //a chapter already exists under the same name.
                 String message = "A chapter (" + c.getTitle() + ") already exists under the same internal name.";
                 message += "\n\t - Work: " + this.getTitle();
-                message += "\n\t - Account: " + this.getAccount().getUsername();
+                message += "\n\t - Account: " + this.getAccount().getEmail();
                 Log.create(message, "Work.createChapter()", "info", null);
                 throw new FileAlreadyExistsException(message);
             }
@@ -135,7 +139,7 @@ public class Work {
         String chapterConfirmationLog = "Created new chapter: ";
         chapterConfirmationLog += "\n\t - Chapter: " + chapter.getTitle();
         chapterConfirmationLog += "\n\t - Work: " + this.getTitle();
-        chapterConfirmationLog += "\n\t - Account: " + this.getAccount().getUsername();
+        chapterConfirmationLog += "\n\t - Account: " + this.getAccount().getEmail();
         Log.create(chapterConfirmationLog, "Work.createChapter", "debug", null);
     }
 

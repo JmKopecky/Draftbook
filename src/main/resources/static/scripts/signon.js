@@ -9,10 +9,22 @@ function submitSignon() {
         pwInput.focus();
         return;
     }
-    //todo implement
-
-    //note temporary send to account page
-    swup.navigate("/account");
+    fetch("/api/auth/authenticate", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: emailInput.value,
+            password: pwInput.value
+        }),
+    }).then((r) => {
+        r.json().then(data => {
+            if (data["authenticated"] !== undefined && data["authenticated"] === true) {
+                swup.navigate("/dashboard");
+            }
+        });
+    });
 }
 
 
@@ -32,9 +44,20 @@ function submitSignup() {
         confirmPwInput.focus();
         return;
     }
-
-    //todo implement
-
-    //note temporary send to account page
-    swup.navigate("/account");
+    fetch("/api/auth/create", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: emailInput.value,
+            password: pwInput.value
+        }),
+    }).then((r) => {
+        r.json().then(data => {
+            if (data["authenticated"] !== undefined && data["authenticated"] === true) {
+                swup.navigate("/dashboard");
+            }
+        });
+    });
 }

@@ -13,13 +13,13 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-    private String username;
+    private String email;
     private String password;
 
 
-    public static Account getByUsername(String username, AccountRepository repository) {
+    public static Account getByEmail(String email, AccountRepository repository) {
         for (Account account : repository.findAll()) {
-            if (account.getUsername().equals(username)) {
+            if (account.getEmail().equals(email)) {
                 return account;
             }
         }
@@ -28,9 +28,9 @@ public class Account {
 
 
 
-    public static Account create(String username, String password, AccountRepository repo) {
+    public static Account create(String email, String password, AccountRepository repo) {
         Account account = new Account();
-        account.setUsername(username);
+        account.setEmail(email);
         account.setPassword(password);
         repo.save(account);
         return account;
@@ -38,9 +38,9 @@ public class Account {
 
 
 
-    public static Account authenticate(String username, String password, AccountRepository repo) {
+    public static Account authenticate(String email, String password, AccountRepository repo) {
         for (Account account : repo.findAll()) {
-            if (account.getUsername().equals(username) && account.getPassword().equals(password)) { //todo secure authentication
+            if (account.getEmail().equals(email) && account.getPassword().equals(password)) { //todo secure authentication
                 return account;
             }
         }
@@ -49,9 +49,9 @@ public class Account {
 
 
 
-    public static boolean exists(String username, AccountRepository repo) {
+    public static boolean exists(String email, AccountRepository repo) {
         for (Account account : repo.findAll()) {
-            if (account.getUsername().equals(username)) {
+            if (account.getEmail().equals(email)) {
                 return true;
             }
         }
@@ -78,11 +78,11 @@ public class Account {
     public void setId(Integer id) {
         this.id = id;
     }
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
     public String getPassword() {
         return password;

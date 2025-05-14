@@ -1,0 +1,11 @@
+@import 'constants';
+
+#site-content {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5vh;
+  min-height: 100vh;
+  width: 100%;
+}

@@ -7,6 +7,11 @@ import dev.jkopecky.draftbook.data.tables.Account;
 import dev.jkopecky.draftbook.data.tables.AccountRepository;
 import dev.jkopecky.draftbook.data.tables.AuthToken;
 import dev.jkopecky.draftbook.data.tables.AuthTokenRepository;
+import dev.jkopecky.draftbook.exceptions.AccountException;
+import dev.jkopecky.draftbook.exceptions.AccountNonexistentException;
+import dev.jkopecky.draftbook.exceptions.InvalidPasswordException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,17 +50,35 @@ public class AuthenticationController {
 
 
 
+    public static Account localAuth(String email, String password, AccountRepository repository) throws AccountException {
+        Account account = null;
+
+        //ensure account exists
+        if (!Account.exists(email, repository)) {
+            throw new AccountNonexistentException();
+        }
+        account = Account.authenticate(email, password, repository);
+        if (account == null) {
+            //incorrect password
+            throw new InvalidPasswordException();
+        }
+
+        return account;
+    }
+
+
+
     @PostMapping("/api/auth/authenticate")
-    public ResponseEntity<HashMap<String, Object>> authenticate(@RequestBody String data) {
+    public ResponseEntity<HashMap<String, Object>> authenticate(@RequestBody String data, HttpServletResponse serverResponse) {
         HashMap<String, Object> response = new HashMap<>();
 
-        String username;
+        String email;
         String password;
 
         ObjectMapper mapper = new ObjectMapper();
         try { //read data from request
             JsonNode node = mapper.readTree(data);
-            username = node.get("username").asText();
+            email = node.get("email").asText();
             password = node.get("password").asText();
         } catch (Exception e) {
             Log.create(e.getMessage(), "AuthenticationController.authenticate()", "info", e);
@@ -63,37 +86,35 @@ public class AuthenticationController {
             return new ResponseEntity<>(response, HttpStatus.valueOf(500));
         }
 
-        //ensure account exists
-        if (!Account.exists(username, accountRepository)) {
-            Log.create("Attempted to access account " + username + ", but it does not exist.",
-                    "AuthenticationController.authenticate()", "info", null);
-            response.put("error", "account_nonexistent");
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        }
-
-        //attempt sign on
-        //todo secure authentication
-        Account account = Account.authenticate(username, password, accountRepository);
-        if (account != null) { //password was correct, successfully authenticated
+        //todo secure sign on
+        try {
+            Account account = localAuth(email, password, accountRepository);
             //delete the old token associated with this account, if any.
             for (AuthToken token : authTokenRepository.findAll()) {
-                if (token.getAccount().getUsername().equals(account.getUsername())) {
+                if (token.getAccount().getEmail().equals(account.getEmail())) {
                     authTokenRepository.delete(token);
                 }
             }
             //create a new token for the account.
             AuthToken token = new AuthToken(account, authTokenRepository);
 
-            HttpHeaders cookieHeaders = new HttpHeaders();
-            String tokenCookie = "token=" + token.getValue() + "; Max-Age=3600;";
-            cookieHeaders.add("Set-Cookie", tokenCookie);
+            Cookie cookie = new Cookie("token", token.getValue());
+            cookie.setMaxAge(60*60);
+            cookie.setPath("/");
+            serverResponse.addCookie(cookie);
 
             response.put("error", "none");
             response.put("authenticated", true);
             response.put("token", token.getValue());
-            return new ResponseEntity<>(response, cookieHeaders, HttpStatus.OK);
-        } else { //incorrect password, reject
-            Log.create("Failed to authenticate account " + username + " with password " + password + ".",
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (AccountNonexistentException _) {
+            Log.create("Attempted to access account " + email + ", but it does not exist.",
+                    "AuthenticationController.authenticate()", "info", null);
+            response.put("error", "account_nonexistent");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+
+        } catch (AccountException _) {
+            Log.create("Failed to authenticate account " + email + " with password " + password + ".",
                     "AuthenticationController.authenticate()", "info", null);
             response.put("error", "invalid_password");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
@@ -106,35 +127,35 @@ public class AuthenticationController {
     public ResponseEntity<HashMap<String, Object>> exists(@RequestBody String data) {
         HashMap<String, Object> response = new HashMap<>();
 
-        String username;
+        String email;
 
         ObjectMapper mapper = new ObjectMapper();
         try { //read data from request
             JsonNode node = mapper.readTree(data);
-            username = node.get("username").asText();
+            email = node.get("email").asText();
         } catch (Exception e) {
             Log.create(e.getMessage(), "AuthenticationController.exists()", "info", e);
             response.put("error", "authenticate_parse");
             return new ResponseEntity<>(response, HttpStatus.valueOf(500));
         }
 
-        response.put("exists", Account.exists(username, accountRepository));
+        response.put("exists", Account.exists(email, accountRepository));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
 
     @PostMapping("/api/auth/create")
-    public ResponseEntity<HashMap<String, Object>> create(@RequestBody String data) {
+    public ResponseEntity<HashMap<String, Object>> create(@RequestBody String data, HttpServletResponse serverResponse) {
         HashMap<String, Object> response = new HashMap<>();
 
-        String username;
+        String email;
         String password;
 
         ObjectMapper mapper = new ObjectMapper();
         try { //read data from request
             JsonNode node = mapper.readTree(data);
-            username = node.get("username").asText();
+            email = node.get("email").asText();
             password = node.get("password").asText();
         } catch (Exception e) {
             Log.create(e.getMessage(), "AuthenticationController.exists()", "info", e);
@@ -143,24 +164,27 @@ public class AuthenticationController {
         }
 
         //make sure the account doesn't already exist
-        if (Account.exists(username, accountRepository)) {
-            Log.create("Attempted to create account, but the username " + username + " already exists.",
+        if (Account.exists(email, accountRepository)) {
+            Log.create("Attempted to create account, but the email " + email + " already exists.",
                     "AuthenticationController.create()", "info", null);
-            response.put("error", "username_taken");
+            response.put("error", "email_taken");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
         //create account
-        Account account = Account.create(username, password, accountRepository);
+        Account account = Account.create(email, password, accountRepository);
         AuthToken token = new AuthToken(account, authTokenRepository);
 
         //reply
         response.put("error", "none");
         response.put("authenticated", true);
         response.put("token", token.getValue());
-        HttpHeaders cookieHeaders = new HttpHeaders();
-        String tokenCookie = "token=" + token.getValue() + "; Max-Age=3600;";
-        cookieHeaders.add("Set-Cookie", tokenCookie);
-        return new ResponseEntity<>(response, cookieHeaders, HttpStatus.OK);
+
+        Cookie cookie = new Cookie("token", token.getValue());
+        cookie.setMaxAge(60*60);
+        cookie.setPath("/");
+        serverResponse.addCookie(cookie);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

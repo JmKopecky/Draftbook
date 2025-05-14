@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Header</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+<header id="header" th:fragment="header">
+    <script src="/scripts/headerdarkmode.js"></script>
+    <a href="/signon" class="nohoveranim noaccentcolor"><button id="signon-button"><i class="fa-solid fa-circle-user"></i></button></a>
+    <nav id="header-link-container">
+        <a class="noaccentcolor" href="/dashboard">Dashboard</a>
+        <a class="noaccentcolor" href="/features">Features</a>
+        <a class="noaccentcolor nohoveranim" href="/"><h1 id="header-nav-link" class="title ignoredarkmode">D</h1></a>
+        <a class="noaccentcolor" href="/pricing">Pricing</a>
+        <a class="noaccentcolor" href="/support">Support</a>
+    </nav>
+    <button id="darkmode-button" onclick="toggleDarkMode();"><i class="fa-solid fa-circle-half-stroke"></i></button>
+</header>
+</body>
+</html>

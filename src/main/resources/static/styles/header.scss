@@ -1,0 +1,34 @@
+@import 'constants';
+
+header {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 90%;
+  padding-left: 5%;
+  padding-right: 5%;
+  height: 10vh;
+  z-index: 999;
+  button {
+    border: none !important;
+    padding: 0;
+    background: transparent !important;
+    font-size: 2em;
+  }
+  nav {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    #header-nav-link {
+      font-size: 3em;
+    }
+  }
+}

@@ -1,0 +1,43 @@
+@import 'constants';
+
+#site-content {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+  form {
+    padding: 1em;
+    border-radius: 1em;
+    box-shadow: 1px 1px 1px 1px darken($primary, 15%);
+    background: darken($primary, 5%);
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 70vh;
+    min-width: 40vw;
+    transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+    .form-input-container {
+      display: flex;
+      flex-flow: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25em;
+      input {
+        width: 150%;
+      }
+    }
+    button {
+      width: fit-content;
+    }
+  }
+}
+
+html.darkmode {
+  form {
+    box-shadow: 1px 1px 1px 1px darken($secondary, 5%) !important;
+    background: lighten($secondary, 5%) !important;
+  }
+}

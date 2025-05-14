@@ -1,0 +1,374 @@
+//import fonts
+@import url('https://fonts.googleapis.com/css2?family=Aleo:ital,wght@0,100..900;1,100..900&family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+//default colors (not necessarily required to be used on the home page, but on things like blog/content pages or as more general site theming.
+$primary: #FEF6C9;
+$secondary: #1E201E;
+$accent: #5B3C36;
+$accent_darkmode: #AC7469;
+$selectioncolor: #FF0040;
+
+
+
+//fix for some elements having a margin by default, which really gets on my nerves when I can't format things how I wish.
+* {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+//paragraph text styling
+span, p {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: $secondary;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out;
+}
+a {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: italic;
+  color: $accent;
+  text-decoration: none;
+  font-size: 1.07em;
+  cursor: pointer;
+  transition: color 0.5s ease-in-out;
+}
+a.noaccentcolor {
+  color: $secondary;
+  font-style: normal;
+}
+a:not(.nohoveranim) {
+  position: relative;
+}
+a:not(.nohoveranim)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  width: 0%;
+  background: $accent;
+  transition: width 0.5s ease-in-out;
+}
+a:not(.nohoveranim).noaccentcolor::after {
+  background: $secondary;
+}
+a:not(.nohoveranim):hover::after {
+  width: 100%;
+}
+strong {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: bold;
+}
+em {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+}
+
+//header text styling
+.title {
+  font-family: "Lobster Two", cursive;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 10em;
+  color: $accent;
+  transition: color 0.5s ease-in-out;
+}
+h1 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-style: normal;
+  font-size: 2.5em;
+  color: $secondary;
+  transition: color 0.5s ease-in-out;
+}
+h2 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 800;
+  font-style: normal;
+  font-size: 2.25em;
+  color: $secondary;
+  transition: color 0.5s ease-in-out;
+}
+h3 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 2em;
+  color: $secondary;
+  transition: color 0.5s ease-in-out;
+}
+h4 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 1.75em;
+  color: $secondary;
+  transition: color 0.5s ease-in-out;
+}
+h5 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 1.5em;
+  color: $secondary;
+  transition: color 0.5s ease-in-out;
+}
+h6 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 450;
+  font-style: normal;
+  font-size: 1.25em;
+  color: $secondary;
+  transition: color 0.5s ease-in-out;
+}
+.fine-print {
+  font-size: 0.75em;
+}
+
+
+//button styling (and anims)
+button {
+  border: 1px solid transparent;
+  background: $accent;
+  border-radius: 0.25em;
+  padding: 0.5em 1em;
+  color: $primary;
+  font-family: "Aleo", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 1.25em;
+  transition: background 0.5s ease-in-out, color 0.5s ease-in-out, border 0.5s ease-in-out;
+  cursor: pointer;
+}
+button:hover, button:focus, button:active {
+  background: $primary;
+  color: $accent;
+  border: 1px solid $accent;
+}
+
+
+//list styling
+li::marker {
+  color: $accent;
+  transition: color 0.5s ease-in-out;
+}
+li {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: $secondary;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out;
+}
+
+
+//input area styling
+label {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: $secondary;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out;
+}
+input {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: $secondary;
+  background: transparent;
+  border-bottom: 1px solid transparentize($secondary, 0.5);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  padding: 0.5em;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out, border 0.5s ease-in-out;
+  outline: none !important;
+}
+input:active, input:focus, input:focus-visible, input:focus-within {
+  border-bottom: 1px solid $secondary;
+}
+input::placeholder {
+  color: $secondary;
+  opacity: 0.5;
+  transition: opacity 0.5s ease-in-out;
+}
+input:hover::placeholder {
+  opacity: 1;
+}
+textarea {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: $secondary;
+  background: transparent;
+  border: 1px solid transparentize($secondary, 0.5);
+  border-radius: 0.25em;
+  padding: 0.5em;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out, border 0.5s ease-in-out;
+  outline: none !important;
+}
+textarea::placeholder {
+  color: $secondary;
+  opacity: 0.5;
+  transition: opacity 0.5s ease-in-out;
+}
+textarea:active, textarea:focus, textarea:focus-visible, textarea:focus-within {
+  border: 1px solid $secondary;
+}
+textarea:hover::placeholder {
+  opacity: 1;
+}
+i {
+  color: $accent;
+  transition: color 0.5s ease-in-out;
+}
+
+
+//default background color for the site
+body {
+  background: $primary;
+  transition: background 0.5s ease-in-out;
+}
+html.darkmode > body {
+  background: $secondary;
+  p:not(.ignoredarkmode), h1:not(.ignoredarkmode), h2:not(.ignoredarkmode), h3:not(.ignoredarkmode), h4:not(.ignoredarkmode), h5:not(.ignoredarkmode), h6:not(.ignoredarkmode), li:not(.ignoredarkmode), label:not(.ignoredarkmode) {
+    color: $primary;
+  }
+  .title {
+    color: $accent_darkmode;
+  }
+  i:not(.ignoredarkmode) {
+    color: $accent_darkmode;
+  }
+  a:not(.ignoredarkmode) {
+    color: $accent_darkmode;
+  }
+  a.noaccentcolor:not(.ignoredarkmode) {
+    color: $primary;
+  }
+  a:not(.ignoredarkmode):not(.nohoveranim)::after {
+    background: $accent_darkmode;
+  }
+  a:not(.ignoredarkmode):not(.nohoveranim).noaccentcolor::after {
+    background: $primary;
+  }
+  button:not(.ignoredarkmode) {
+    background: $accent_darkmode;
+    color: $secondary;
+  }
+  button:hover:not(.ignoredarkmode), button:focus:not(.ignoredarkmode), button:active:not(.ignoredarkmode) {
+    color: $accent_darkmode;
+    background: transparent;
+    border-color: $accent_darkmode;
+  }
+  input:not(.ignoredarkmode) {
+    color: $primary;
+    border-bottom-color: transparentize($primary, 0.5);
+  }
+  input:not(.ignoredarkmode):hover {
+    border-bottom-color: $primary;
+  }
+  input:not(.ignoredarkmode)::placeholder {
+    color: $primary;
+  }
+  textarea:not(.ignoredarkmode) {
+    border-color: transparentize($primary, 0.5);
+    color: $primary;
+  }
+  textarea:not(.ignoredarkmode)::placeholder {
+    color: $primary;
+  }
+  textarea:not(.ignoredarkmode):active, textarea:not(.ignoredarkmode):focus, textarea:not(.ignoredarkmode):focus-visible, textarea:not(.ignoredarkmode):focus-within {
+    border: 1px solid $primary;
+  }
+  li::marker:not(.ignoredarkmode) {
+    color: $accent_darkmode;
+  }
+}
+html.darkmode {
+  ::-webkit-scrollbar-thumb {
+    background: $accent_darkmode;
+  }
+}
+main {
+  min-height: 100vh;
+}
+
+
+//styling for text that you click-highlight
+::-moz-selection {
+  background: $selectioncolor;
+}
+::selection {
+  background: $selectioncolor;
+}
+
+
+
+//styling for the scrollbar
+::-webkit-scrollbar {
+  width: 0.3em;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: $accent;
+  transition: background 0.5s ease-in-out;
+  border-radius: 0.15em;
+}
+::-webkit-resizer {
+  display: none;
+}
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+
+//swup animations
+html.is-changing .transition-fade {
+  transition: opacity 0.25s ease-in-out;
+  opacity: 1;
+}
+html.is-animating .transition-fade {
+  opacity: 0;
+}
+
+
+//quill global configs
+.ql-snow.ql-toolbar button {
+  border: none !important;
+}
+
+
+//hljs
+pre {
+  padding-left: 0.5em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}

@@ -1,0 +1,408 @@
+@import url("https://fonts.googleapis.com/css2?family=Aleo:ital,wght@0,100..900;1,100..900&family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+* {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+span, p {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: #1E201E;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out;
+}
+
+a {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: italic;
+  color: #5B3C36;
+  text-decoration: none;
+  font-size: 1.07em;
+  cursor: pointer;
+  transition: color 0.5s ease-in-out;
+}
+
+a.noaccentcolor {
+  color: #1E201E;
+  font-style: normal;
+}
+
+a:not(.nohoveranim) {
+  position: relative;
+}
+
+a:not(.nohoveranim)::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  width: 0%;
+  background: #5B3C36;
+  transition: width 0.5s ease-in-out;
+}
+
+a:not(.nohoveranim).noaccentcolor::after {
+  background: #1E201E;
+}
+
+a:not(.nohoveranim):hover::after {
+  width: 100%;
+}
+
+strong {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: bold;
+}
+
+em {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+}
+
+.title {
+  font-family: "Lobster Two", cursive;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 10em;
+  color: #5B3C36;
+  transition: color 0.5s ease-in-out;
+}
+
+h1 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-style: normal;
+  font-size: 2.5em;
+  color: #1E201E;
+  transition: color 0.5s ease-in-out;
+}
+
+h2 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 800;
+  font-style: normal;
+  font-size: 2.25em;
+  color: #1E201E;
+  transition: color 0.5s ease-in-out;
+}
+
+h3 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 2em;
+  color: #1E201E;
+  transition: color 0.5s ease-in-out;
+}
+
+h4 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 1.75em;
+  color: #1E201E;
+  transition: color 0.5s ease-in-out;
+}
+
+h5 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 1.5em;
+  color: #1E201E;
+  transition: color 0.5s ease-in-out;
+}
+
+h6 {
+  font-family: "Aleo", serif;
+  font-optical-sizing: auto;
+  font-weight: 450;
+  font-style: normal;
+  font-size: 1.25em;
+  color: #1E201E;
+  transition: color 0.5s ease-in-out;
+}
+
+.fine-print {
+  font-size: 0.75em;
+}
+
+button {
+  border: 1px solid transparent;
+  background: #5B3C36;
+  border-radius: 0.25em;
+  padding: 0.5em 1em;
+  color: #FEF6C9;
+  font-family: "Aleo", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 1.25em;
+  transition: background 0.5s ease-in-out, color 0.5s ease-in-out, border 0.5s ease-in-out;
+  cursor: pointer;
+}
+
+button:hover, button:focus, button:active {
+  background: #FEF6C9;
+  color: #5B3C36;
+  border: 1px solid #5B3C36;
+}
+
+li::marker {
+  color: #5B3C36;
+  transition: color 0.5s ease-in-out;
+}
+
+li {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: #1E201E;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out;
+}
+
+label {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: #1E201E;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out;
+}
+
+input {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: #1E201E;
+  background: transparent;
+  border-bottom: 1px solid rgba(30, 32, 30, 0.5);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  padding: 0.5em;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out, border 0.5s ease-in-out;
+  outline: none !important;
+}
+
+input:active, input:focus, input:focus-visible, input:focus-within {
+  border-bottom: 1px solid #1E201E;
+}
+
+input::placeholder {
+  color: #1E201E;
+  opacity: 0.5;
+  transition: opacity 0.5s ease-in-out;
+}
+
+input:hover::placeholder {
+  opacity: 1;
+}
+
+textarea {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: #1E201E;
+  background: transparent;
+  border: 1px solid rgba(30, 32, 30, 0.5);
+  border-radius: 0.25em;
+  padding: 0.5em;
+  font-size: 1.07em;
+  transition: color 0.5s ease-in-out, border 0.5s ease-in-out;
+  outline: none !important;
+}
+
+textarea::placeholder {
+  color: #1E201E;
+  opacity: 0.5;
+  transition: opacity 0.5s ease-in-out;
+}
+
+textarea:active, textarea:focus, textarea:focus-visible, textarea:focus-within {
+  border: 1px solid #1E201E;
+}
+
+textarea:hover::placeholder {
+  opacity: 1;
+}
+
+i {
+  color: #5B3C36;
+  transition: color 0.5s ease-in-out;
+}
+
+body {
+  background: #FEF6C9;
+  transition: background 0.5s ease-in-out;
+}
+
+html.darkmode > body {
+  background: #1E201E;
+}
+html.darkmode > body p:not(.ignoredarkmode), html.darkmode > body h1:not(.ignoredarkmode), html.darkmode > body h2:not(.ignoredarkmode), html.darkmode > body h3:not(.ignoredarkmode), html.darkmode > body h4:not(.ignoredarkmode), html.darkmode > body h5:not(.ignoredarkmode), html.darkmode > body h6:not(.ignoredarkmode), html.darkmode > body li:not(.ignoredarkmode), html.darkmode > body label:not(.ignoredarkmode) {
+  color: #FEF6C9;
+}
+html.darkmode > body .title {
+  color: #AC7469;
+}
+html.darkmode > body i:not(.ignoredarkmode) {
+  color: #AC7469;
+}
+html.darkmode > body a:not(.ignoredarkmode) {
+  color: #AC7469;
+}
+html.darkmode > body a.noaccentcolor:not(.ignoredarkmode) {
+  color: #FEF6C9;
+}
+html.darkmode > body a:not(.ignoredarkmode):not(.nohoveranim)::after {
+  background: #AC7469;
+}
+html.darkmode > body a:not(.ignoredarkmode):not(.nohoveranim).noaccentcolor::after {
+  background: #FEF6C9;
+}
+html.darkmode > body button:not(.ignoredarkmode) {
+  background: #AC7469;
+  color: #1E201E;
+}
+html.darkmode > body button:hover:not(.ignoredarkmode), html.darkmode > body button:focus:not(.ignoredarkmode), html.darkmode > body button:active:not(.ignoredarkmode) {
+  color: #AC7469;
+  background: transparent;
+  border-color: #AC7469;
+}
+html.darkmode > body input:not(.ignoredarkmode) {
+  color: #FEF6C9;
+  border-bottom-color: rgba(254, 246, 201, 0.5);
+}
+html.darkmode > body input:not(.ignoredarkmode):hover {
+  border-bottom-color: #FEF6C9;
+}
+html.darkmode > body input:not(.ignoredarkmode)::placeholder {
+  color: #FEF6C9;
+}
+html.darkmode > body textarea:not(.ignoredarkmode) {
+  border-color: rgba(254, 246, 201, 0.5);
+  color: #FEF6C9;
+}
+html.darkmode > body textarea:not(.ignoredarkmode)::placeholder {
+  color: #FEF6C9;
+}
+html.darkmode > body textarea:not(.ignoredarkmode):active, html.darkmode > body textarea:not(.ignoredarkmode):focus, html.darkmode > body textarea:not(.ignoredarkmode):focus-visible, html.darkmode > body textarea:not(.ignoredarkmode):focus-within {
+  border: 1px solid #FEF6C9;
+}
+html.darkmode > body li::marker:not(.ignoredarkmode) {
+  color: #AC7469;
+}
+
+html.darkmode ::-webkit-scrollbar-thumb {
+  background: #AC7469;
+}
+
+main {
+  min-height: 100vh;
+}
+
+::-moz-selection {
+  background: #FF0040;
+}
+
+::selection {
+  background: #FF0040;
+}
+
+::-webkit-scrollbar {
+  width: 0.3em;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5B3C36;
+  transition: background 0.5s ease-in-out;
+  border-radius: 0.15em;
+}
+
+::-webkit-resizer {
+  display: none;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+html.is-changing .transition-fade {
+  transition: opacity 0.25s ease-in-out;
+  opacity: 1;
+}
+
+html.is-animating .transition-fade {
+  opacity: 0;
+}
+
+.ql-snow.ql-toolbar button {
+  border: none !important;
+}
+
+pre {
+  padding-left: 0.5em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+header {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 90%;
+  padding-left: 5%;
+  padding-right: 5%;
+  height: 10vh;
+  z-index: 999;
+}
+header button {
+  border: none !important;
+  padding: 0;
+  background: transparent !important;
+  font-size: 2em;
+}
+header nav {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+}
+header nav #header-nav-link {
+  font-size: 3em;
+}
+
+/*# sourceMappingURL=header.css.map */

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Draftbook</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <link rel="stylesheet" href="/styles/signon.css">
+    <link rel="stylesheet" href="/styles/header.css">
+
+    <script src="https://unpkg.com/swup@4"></script>
+    <script src="https://unpkg.com/@swup/head-plugin@2"></script>
+    <script src="https://unpkg.com/@swup/scripts-plugin@2"></script>
+    <script data-swup-reload-script src="https://kit.fontawesome.com/2b6129ab2e.js" crossorigin="anonymous"></script>
+    <script src="/scripts/swuphooks.js"></script>
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main id="swup" class="page-content transition-fade">
+    <!-- Hero tagline idea: Got a story idea? let me help. -->
+    <!-- Don't hide the fact that this is a solo dev project -->
+
+    <div id="site-content">
+        <form id="signin-form" onclick="submitSignon(); return false;" th:style="${newaccount ? 'display: none;' : 'display: flex;'}">
+            <h1>Sign In</h1>
+            <div class="form-input-container">
+                <label for="signin-email">Email</label>
+                <input type="text" id="signin-email" placeholder="Email">
+            </div>
+            <div class="form-input-container">
+                <label for="signin-password">Password</label>
+                <input type="text" id="signin-password" placeholder="Password">
+            </div>
+            <button>Sign In</button>
+            <a href="/signon?create=true">Or Sign Up</a>
+        </form>
+        <form id="signup-form" onclick="submitSignup(); return false;" th:style="${newaccount ? 'display: flex;' : 'display: none;'}">
+            <h1>Sign Up</h1>
+            <div class="form-input-container">
+                <label for="signup-email">Email</label>
+                <input type="text" id="signup-email" placeholder="Email">
+            </div>
+            <div class="form-input-container">
+                <label for="signup-password">Password</label>
+                <input type="text" id="signup-password" placeholder="Password">
+            </div>
+            <div class="form-input-container">
+                <label for="signup-confirm-password">Confirm</label>
+                <input type="text" id="signup-confirm-password" placeholder="Confirm password">
+            </div>
+            <button>Create</button>
+            <a href="/signon?create=false">Or Sign In</a>
+        </form>
+    </div>
+</main>
+
+
+
+</body>
+</html>

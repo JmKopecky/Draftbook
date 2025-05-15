@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jkopecky.draftbook.Log;
 import dev.jkopecky.draftbook.data.tables.*;
+import dev.jkopecky.draftbook.exceptions.NoteCategoryOwnershipException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 @Controller
 @CrossOrigin
@@ -44,7 +46,7 @@ public class NoteController {
         //retrieve work
         ArrayList<Work> works = account.getOwnedWorks(workRepository);
         for (Work work : works) {
-            if (work.toResource().equals(target)) {
+            if (("" + work.getId()).equals(target)) {
                 //found the work
                 return work;
             }
@@ -52,7 +54,7 @@ public class NoteController {
 
         //if this point is reached, the work was not found in the user's list of works
         Log.create("Failed to find work " + target + " in account work list.",
-                "WorkController.getWork()", "info", null);
+                "NoteController.getTargetWork()", "info", null);
         return "unrecognized_work";
     }
 
@@ -93,9 +95,9 @@ public class NoteController {
 
 
     //note: inputs {noteCategoryName}
-    @PostMapping("/api/works/notecategories/create")
+    @PostMapping("/api/work/{workid}/notecategory/create")
     public ResponseEntity<HashMap<String, Object>> createCategory(
-            @RequestParam(name = "target") String target,
+            @PathVariable int workid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -104,7 +106,7 @@ public class NoteController {
         Account account;
         Work work;
 
-        //retrieve response data
+        //retrieve request data
         String noteCategoryName;
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -121,14 +123,26 @@ public class NoteController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "NoteController.createCategory()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "NoteController.createCategory()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "NoteController.createCategory()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
 
@@ -136,6 +150,8 @@ public class NoteController {
             NoteCategory.create(noteCategoryRepository, work, noteCategoryName);
         } catch (IOException e) {
             Log.create(e.getMessage(), "NoteController.createCategory()", "error", e);
+            response.put("error", e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         response.put("error", "none");
@@ -145,9 +161,9 @@ public class NoteController {
 
 
     //note: inputs {noteCategoryName}
-    @PostMapping("/api/works/notecategories/rename")
+    @PostMapping("/api/work/{workid}/notecategory/{categoryid}/rename")
     public ResponseEntity<HashMap<String, Object>> renameCategory(
-            @RequestParam(name = "target") String target,
+            @PathVariable int workid, @PathVariable int categoryid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -156,7 +172,7 @@ public class NoteController {
         Account account;
         Work work;
 
-        //retrieve response data
+        //retrieve request data
         String noteCategoryName;
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -173,14 +189,26 @@ public class NoteController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "NoteController.renameCategory()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "NoteController.renameCategory()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "NoteController.renameCategory()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
         //todo implement
@@ -192,9 +220,9 @@ public class NoteController {
 
 
     //note: inputs {noteCategoryName}
-    @PostMapping("/api/works/notecategories/delete")
+    @PostMapping("/api/work/{workid}/notecategory{categoryid}/delete")
     public ResponseEntity<HashMap<String, Object>> deleteCategory(
-            @RequestParam(name = "target") String target,
+            @PathVariable int workid, @PathVariable int categoryid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -203,17 +231,14 @@ public class NoteController {
         Account account;
         Work work;
 
-        //retrieve response data
-        String noteCategoryName;
+        //retrieve token if applicable
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            noteCategoryName = node.get("noteCategoryName").asText();
             //token verification if included in request body
             if (node.has("token")) {
                 token = node.get("token").asText();
             }
-
         } catch (IOException e) {
             Log.create(e.getMessage(), "NoteController.deleteCategory()", "error", e);
             response.put("error", e.getMessage());
@@ -221,38 +246,60 @@ public class NoteController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "NoteController.deleteCategory()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "NoteController.deleteCategory()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "NoteController.deleteCategory()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
 
         //find the noteCategory and delete it
-        for (NoteCategory cat : NoteCategory.getWorkNoteCategories(work, noteCategoryRepository)) {
-            if (cat.getCategoryName().equals(noteCategoryName)) {
-                //delete
-                for (String s : cat.getNotes()) {
-                    try {
-                        cat.deleteNote(s, noteCategoryRepository);
-                    } catch (IOException e) {
-                        Log.create("Failed to delete note: " + s, "NoteController.deleteCategory()", "error", e);
-                        response.put("error", e.getMessage());
-                        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-                    }
-
-                }
-                File noteDir = new File(cat.findPath() + "/");
-                noteDir.delete();
-                File catRoot = new File(cat.findPath() + ".json");
-                catRoot.delete();
-                noteCategoryRepository.delete(cat);
+        try {
+            NoteCategory category = noteCategoryRepository.findById(categoryid).get();
+            if (category.getWork().getId().intValue() != work.getId()) {
+                throw new NoteCategoryOwnershipException();
             }
+            //delete
+            for (String s : category.getNotes()) {
+                try {
+                    category.deleteNote(s, noteCategoryRepository);
+                } catch (IOException e) {
+                    Log.create("Failed to delete note: " + s, "NoteController.deleteCategory()", "error", e);
+                    response.put("error", e.getMessage());
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
+            new File(category.findPath() + "/").delete();
+            new File(category.findPath() + ".json").delete();
+            noteCategoryRepository.delete(category);
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve category " + categoryid + ", but it does not exist",
+                    "NoteController.deleteCategory()", "info", null);
+            response.put("error", "unrecognized_category");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (NoteCategoryOwnershipException e) {
+            Log.create("category " + categoryid + " is not owned by work " + workid,
+                    "NoteController.deleteCategory()", "info", null);
+            response.put("error", "category_invalid_ownership");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+
 
         response.put("error", "none");
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -267,9 +314,9 @@ public class NoteController {
 
 
     //note: inputs {noteCategoryName, noteName}
-    @PostMapping("/api/works/notes/create")
+    @PostMapping("/api/work/{workid}/notecategory/{categoryid}/note/create")
     public ResponseEntity<HashMap<String, Object>> createNote(
-            @RequestParam(name = "target") String target,
+            @PathVariable int workid, @PathVariable int categoryid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -278,13 +325,11 @@ public class NoteController {
         Account account;
         Work work;
 
-        //retrieve response data
-        String noteCategoryName;
+        //retrieve request data
         String noteName;
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            noteCategoryName = node.get("noteCategoryName").asText();
             noteName = node.get("noteName").asText();
             //token verification if included in request body
             if (node.has("token")) {
@@ -297,29 +342,50 @@ public class NoteController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "NoteController.createNote()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "NoteController.createNote()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "NoteController.createNote()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
-
-        for (NoteCategory cat : NoteCategory.getWorkNoteCategories(work, noteCategoryRepository)) {
-            if (cat.getCategoryName().equals(noteCategoryName)) {
-                try {
-                    cat.addNote(noteName, "", noteCategoryRepository);
-                    noteCategoryRepository.save(cat);
-                } catch (IOException e) {
-                    Log.create(e.getMessage(), "NoteController.createNote()", "error", e);
-                    response.put("error", e.getMessage());
-                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-                }
-
+        //find the notecategory and create the note
+        try {
+            NoteCategory category = noteCategoryRepository.findById(categoryid).get();
+            if (category.getWork().getId().intValue() != work.getId()) {
+                throw new NoteCategoryOwnershipException();
             }
+            category.addNote(noteName, "", noteCategoryRepository);
+            noteCategoryRepository.save(category);
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve category " + categoryid + ", but it does not exist",
+                    "NoteController.deleteCategory()", "info", null);
+            response.put("error", "unrecognized_category");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (NoteCategoryOwnershipException e) {
+            Log.create("category " + categoryid + " is not owned by work " + workid,
+                    "NoteController.deleteCategory()", "info", null);
+            response.put("error", "category_invalid_ownership");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (IOException e) {
+            Log.create(e.getMessage(), "NoteController.createNote()", "error", e);
+            response.put("error", e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         response.put("error", "none");
@@ -329,9 +395,9 @@ public class NoteController {
 
 
     //note: inputs {noteCategoryName, noteName}
-    @PostMapping("/api/works/notes/select")
+    @PostMapping("/api/work/{workid}/notecategory/{categoryid}/note/select")
     public ResponseEntity<HashMap<String, Object>> selectNote(
-            @RequestParam(name = "target") String target,
+            @PathVariable int workid, @PathVariable int categoryid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -341,12 +407,10 @@ public class NoteController {
         Work work;
 
         //retrieve response data
-        String noteCategoryName;
         String noteName;
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            noteCategoryName = node.get("noteCategoryName").asText();
             noteName = node.get("noteName").asText();
             //token verification if included in request body
             if (node.has("token")) {
@@ -359,14 +423,26 @@ public class NoteController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "NoteController.selectNote()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "NoteController.selectNote()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "NoteController.selectNote()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
 
@@ -379,9 +455,9 @@ public class NoteController {
 
 
     //note: inputs {noteCategoryName, noteName, newNoteName}
-    @PostMapping("/api/works/notes/rename")
+    @PostMapping("/api/work/{workid}/notecategory/{categoryid}/note/rename")
     public ResponseEntity<HashMap<String, Object>> renameNote(
-            @RequestParam(name = "target") String target,
+            @PathVariable int workid, @PathVariable int categoryid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -391,13 +467,11 @@ public class NoteController {
         Work work;
 
         //retrieve response data
-        String noteCategoryName;
         String noteName;
         String newNoteName;
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            noteCategoryName = node.get("noteCategoryName").asText();
             noteName = node.get("noteName").asText();
             newNoteName = node.get("newNoteName").asText();
             //token verification if included in request body
@@ -411,33 +485,60 @@ public class NoteController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "NoteController.renameNote()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "NoteController.renameNote()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "NoteController.renameNote()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
 
-        for (NoteCategory cat : NoteCategory.getWorkNoteCategories(work, noteCategoryRepository)) {
-            if (cat.getCategoryName().equals(noteCategoryName)) {
-                if (cat.getNotes().contains(noteName)) {
-                    try {
-                        cat.renameNote(noteName, newNoteName, noteCategoryRepository);
-                    } catch (FileAlreadyExistsException e) {
-                        response.put("error", "file_already_exists");
-                        Log.create("Attempted to edit note name, but the filename already is being used.", "NoteController.renameNote()", "info", null);
-                        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-                    } catch (FileNotFoundException e) {
-                        response.put("error", "unrecognized_note");
-                        Log.create("Attempted to rename note that does not exist.", "NoteController.renameNote()", "info", null);
-                        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-                    }
+
+        //find the notecategory and rename the note
+        try {
+            NoteCategory category = noteCategoryRepository.findById(categoryid).get();
+            if (category.getWork().getId().intValue() != work.getId()) {
+                throw new NoteCategoryOwnershipException();
+            }
+
+            if (category.getNotes().contains(noteName)) {
+                try {
+                    category.renameNote(noteName, newNoteName, noteCategoryRepository);
+                } catch (FileAlreadyExistsException e) {
+                    response.put("error", "file_already_exists");
+                    Log.create("Attempted to edit note name, but the filename already is being used.", "NoteController.renameNote()", "info", null);
+                    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+                } catch (FileNotFoundException e) {
+                    response.put("error", "unrecognized_note");
+                    Log.create("Attempted to rename note that does not exist.", "NoteController.renameNote()", "info", null);
+                    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                 }
             }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve category " + categoryid + ", but it does not exist",
+                    "NoteController.deleteCategory()", "info", null);
+            response.put("error", "unrecognized_category");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (NoteCategoryOwnershipException e) {
+            Log.create("category " + categoryid + " is not owned by work " + workid,
+                    "NoteController.deleteCategory()", "info", null);
+            response.put("error", "category_invalid_ownership");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         response.put("error", "none");
@@ -447,9 +548,9 @@ public class NoteController {
 
 
     //note: inputs {noteCategoryName, noteName}
-    @PostMapping("/api/works/notes/save")
+    @PostMapping("/api/work/{workid}/notecategory/{categoryid}/note/save")
     public ResponseEntity<HashMap<String, Object>> saveNote(
-            @RequestParam(name = "target") String target,
+            @PathVariable int workid, @PathVariable int categoryid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -459,12 +560,10 @@ public class NoteController {
         Work work;
 
         //retrieve response data
-        String noteCategoryName;
         String noteName;
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            noteCategoryName = node.get("noteCategoryName").asText();
             noteName = node.get("noteName").asText();
             //token verification if included in request body
             if (node.has("token")) {
@@ -477,14 +576,26 @@ public class NoteController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "NoteController.saveNote()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "NoteController.saveNote()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "NoteController.saveNote()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
 
@@ -497,9 +608,9 @@ public class NoteController {
 
 
     //note: inputs {noteCategoryName, noteName}
-    @PostMapping("/api/works/notes/delete")
+    @PostMapping("/api/work/{workid}/notecategory/{categoryid}/note/delete")
     public ResponseEntity<HashMap<String, Object>> deleteNote(
-            @RequestParam(name = "target") String target,
+            @PathVariable int workid, @PathVariable int categoryid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -509,12 +620,10 @@ public class NoteController {
         Work work;
 
         //retrieve response data
-        String noteCategoryName;
         String noteName;
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            noteCategoryName = node.get("noteCategoryName").asText();
             noteName = node.get("noteName").asText();
             //token verification if included in request body
             if (node.has("token")) {
@@ -527,33 +636,58 @@ public class NoteController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "NoteController.deleteNote()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "NoteController.deleteNote()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "NoteController.deleteNote()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
+        //retrieve the category and delete the note
+        try {
+            NoteCategory category = noteCategoryRepository.findById(categoryid).get();
+            if (category.getWork().getId().intValue() != work.getId()) {
+                throw new NoteCategoryOwnershipException();
+            }
 
-        for (NoteCategory cat : NoteCategory.getWorkNoteCategories(work, noteCategoryRepository)) {
-            if (cat.getCategoryName().equals(noteCategoryName)) {
-                if (cat.getNotes().contains(noteName)) {
-                    try {
-                        cat.deleteNote(noteName, noteCategoryRepository);
-                    } catch (FileNotFoundException e) {
-                        Log.create("Attempted to delete note " + noteName + ", but it does not exist", "NoteController.deleteNote()", "info", null);
-                        response.put("error", "note_does_not_exist");
-                        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-                    } catch (Exception e) {
-                        Log.create(e.getMessage(), "NoteController.deleteNote()", "error", e);
-                        response.put("error", e.getMessage());
-                        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-                    }
+            if (category.getNotes().contains(noteName)) {
+                try {
+                    category.deleteNote(noteName, noteCategoryRepository);
+                } catch (FileNotFoundException e) {
+                    Log.create("Attempted to delete note " + noteName + ", but it does not exist", "NoteController.deleteNote()", "info", null);
+                    response.put("error", "note_does_not_exist");
+                    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+                } catch (Exception e) {
+                    Log.create(e.getMessage(), "NoteController.deleteNote()", "error", e);
+                    response.put("error", e.getMessage());
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve category " + categoryid + ", but it does not exist",
+                    "NoteController.deleteCategory()", "info", null);
+            response.put("error", "unrecognized_category");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (NoteCategoryOwnershipException e) {
+            Log.create("category " + categoryid + " is not owned by work " + workid,
+                    "NoteController.deleteCategory()", "info", null);
+            response.put("error", "category_invalid_ownership");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         response.put("error", "none");

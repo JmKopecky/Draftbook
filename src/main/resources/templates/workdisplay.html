@@ -26,7 +26,55 @@
     <!-- Don't hide the fact that this is a solo dev project -->
 
     <div id="site-content">
-        <h1>Work Display</h1>
+        <!--
+        What the user needs to be able to access easily:
+        Settings and metadata edit
+        Work-wide notes
+        Chapter list (and access to those chapters).
+            Ideally, chapter areas would also have access to the work-wide notes panel.
+            Also these would need access to chapter-specific notes.
+            Perhaps a separate page for the chapter interface
+        -->
+        <div id="nav">
+            <!-- Settings, Chapters, Notes, Export -->
+            <h6 class="nav-tile" data-section="metadata" th:classappend="${section.equals('metadata') ? 'active' : ''}" onclick="setNav(this)">Metadata</h6>
+            <h6 class="nav-tile" data-section="chapters" th:classappend="${section.equals('chapters') ? 'active' : ''}" onclick="setNav(this)">Chapters</h6>
+            <h6 class="nav-tile" data-section="notes" th:classappend="${section.equals('notes') ? 'active' : ''}" onclick="setNav(this)">Notes</h6>
+            <h6 class="nav-tile leftmost" data-section="export" th:classappend="${section.equals('export') ? 'active' : ''}" onclick="setNav(this)">Export</h6>
+        </div>
+        <div class="contentarea" data-section="metadata" th:style="${section.equals('metadata') ? 'display: flex;' : 'display: none;'}">
+            <!--
+            What do we need here?
+            Title
+            Cover image
+            Synopsis
+            Word Count
+            -->
+            <p id="workid" th:text="${'Internal Resource ID: ' + work.getId()}"></p>
+        </div>
+        <div class="contentarea" data-section="chapters" th:style="${section.equals('chapters') ? 'display: flex;' : 'display: none;'}">
+            <div id="chapter-list-area" class="background">
+                <div class="chapter-listing" th:each="chapter:${chapters}" th:data-chapter="${chapter.getId()}">
+                    <div class="chapter-move-icons">
+                        <i class="fa-solid fa-up-long"></i>
+                        <i class="fa-solid fa-down-long"></i>
+                    </div>
+                    <form onsubmit="renameChapter(this); return false;">
+                        <input class="chapter-name-input" th:value="${chapter.getTitle()}">
+                    </form>
+                    <div class="chapter-modification-icons">
+                        <i class="fa-solid fa-i-cursor" onclick="renameChapter(this)"></i>
+                        <i class="fa-solid fa-trash" onclick="deleteChapter(this)"></i>
+                    </div>
+                    <button onclick="openChapter(this)">Edit</button>
+                </div>
+            </div>
+            <div id="chapter-create-area" class="background">
+                <input id="chapter-create-title-input" placeholder="Chapter title">
+                <input id="chapter-create-number-input" placeholder="Chapter Number" th:value="${chapters.size() + 1}">
+                <button onclick="createChapter()">Create</button>
+            </div>
+        </div>
     </div>
 </main>
 

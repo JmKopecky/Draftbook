@@ -36,7 +36,7 @@ public class AuthenticationController {
     }
 
 
-
+    //todo adapt to use custom exceptions with more detailed names
     public static Account getByToken(String token, AuthTokenRepository authTokenRepository) throws Exception {
         for (AuthToken authToken : authTokenRepository.findAll()) {
             if (authToken.getValue().equals(token)) {

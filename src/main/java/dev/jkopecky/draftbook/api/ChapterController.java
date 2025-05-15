@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jkopecky.draftbook.Log;
 import dev.jkopecky.draftbook.data.tables.*;
+import dev.jkopecky.draftbook.exceptions.ChapterOwnershipException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 @Controller
 @CrossOrigin
@@ -34,65 +36,11 @@ public class ChapterController {
 
 
 
-    private Object getTargetWork(String target, Account account) {
-        //retrieve work
-        ArrayList<Work> works = account.getOwnedWorks(workRepository);
-        for (Work work : works) {
-            if (work.toResource().equals(target)) {
-                //found the work
-                return work;
-            }
-        }
-
-        //if this point is reached, the work was not found in the user's list of works
-        Log.create("Failed to find work " + target + " in account work list.",
-                "WorkController.getWork()", "info", null);
-        return "unrecognized_work";
-    }
-
-
-
-    public ArrayList<Object> getAccountAndWork(String token, String target) {
-        ArrayList<Object> output = new ArrayList<>();
-        String error = "none";
-
-        //confirm user credentials
-        Account account;
-        try {
-            account = AuthenticationController.getByToken(token, authTokenRepository);
-        } catch (Exception e) {
-            //failed to retrieve account;
-            error = "Failed to match auth token to account";
-            output.add(error);
-            return output;
-        }
-
-        //retrieve work
-        Work work;
-        Object workResult = getTargetWork(target, account);
-        if (workResult instanceof Work w) {
-            work = w;
-        } else {
-            error = "" + workResult;
-            output.add(error);
-            return output;
-        }
-        output.add(account);
-        output.add(work);
-        output.add(error);
-        return output;
-    }
-
-
-
-
-
-
 
     //note: inputs {chaptername, chapternumber}
-    @PostMapping("/api/works/chapters/create")
+    @PostMapping("/api/work/{workid}/chapter/create")
     public ResponseEntity<HashMap<String, Object>> createChapter(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -119,14 +67,24 @@ public class ChapterController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "ChapterController.createChapter()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist", "ChapterController.createChapter()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(), "ChapterController.createChapter()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
 
@@ -144,9 +102,9 @@ public class ChapterController {
 
 
     //note: inputs {chaptername}
-    @PostMapping("/api/works/chapters/select")
+    @PostMapping("/api/work/{workid}/chapter/{chapterid}/select")
     public ResponseEntity<HashMap<String, Object>> selectChapter(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid, @PathVariable int chapterid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -155,12 +113,10 @@ public class ChapterController {
         Account account;
         Work work;
 
-        //retrieve response data
-        String chapterTarget;
+        //retrieve token if applicable
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            chapterTarget = node.get("chaptername").asText();
             //token verification if included in request body
             if (node.has("token")) {
                 token = node.get("token").asText();
@@ -171,42 +127,58 @@ public class ChapterController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "ChapterController.selectChapter()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "ChapterController.selectChapter()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "ChapterController.selectChapter()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1);
         }
 
-
         try {
-            for (Chapter c : work.getChapters(chapterRepository)) {
-                if (c.toResource().equals(chapterTarget)) {
-                    response.put("content", c.retrieveAsHTML());
-                    response.put("notes", c.readNotes());
-                    response.put("title", c.getTitle());
-                    response.put("error", "none");
-                    return new ResponseEntity<>(response, HttpStatus.OK);
-                }
+            Chapter c = chapterRepository.findById(chapterid).get();
+            if (c.getWork().getId().intValue() != work.getId()) {
+                throw new ChapterOwnershipException();
             }
+            response.put("content", c.retrieveAsHTML());
+            response.put("notes", c.readNotes());
+            response.put("title", c.getTitle());
+            response.put("error", "none");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            Log.create("chapter " + chapterid + " does not exist", "ChapterController.selectChapter()", "error", e);
+            response.put("error", "chapter " + chapterid + " does not exist");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         } catch (IOException e) {
             Log.create(e.getMessage(), "ChapterController.selectChapter()", "error", e);
             response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (ChapterOwnershipException e) {
+            Log.create("chapter " + chapterid + " is not owned by work " + workid, "ChapterController.selectChapter()", "info", e);
+            response.put("error", "chapter " + chapterid + " is not owned by work " + workid);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-
-        response.put("error", "unrecognized_chapter");
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
 
     //note: inputs {chaptername}
-    @PostMapping("/api/works/chapters/rename")
+    @PostMapping("/api/work/{workid}/chapter/{chapterid}/rename")
     public ResponseEntity<HashMap<String, Object>> renameChapter(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid, @PathVariable int chapterid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -215,30 +187,40 @@ public class ChapterController {
         Account account;
         Work work;
 
-        //retrieve response data
-        String chapterTarget;
+        //retrieve token if applicable
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            chapterTarget = node.get("chaptername").asText();
             //token verification if included in request body
             if (node.has("token")) {
                 token = node.get("token").asText();
             }
         } catch (IOException e) {
-            Log.create(e.getMessage(), "ChapterController.selectChapter()", "error", e);
+            Log.create(e.getMessage(), "ChapterController.renameChapter()", "error", e);
             response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "ChapterController.renameChapter()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "ChapterController.renameChapter()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "ChapterController.renameChapter()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1);
         }
 
         return null; //todo implement
@@ -247,9 +229,9 @@ public class ChapterController {
 
 
     //note: inputs {chaptername, content, notes}
-    @PostMapping("/api/works/chapters/save")
+    @PostMapping("/api/work/{workid}/chapter/{chapterid}/save")
     public ResponseEntity<HashMap<String, Object>> saveChapter(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid, @PathVariable int chapterid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -259,13 +241,11 @@ public class ChapterController {
         Work work;
 
         //retrieve response data
-        String chapterTitle;
         String content;
         String notes;
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            chapterTitle = node.get("chaptername").asText();
             content = node.get("content").asText();
             notes = node.get("notes").asText();
             //token verification if included in request body
@@ -279,49 +259,61 @@ public class ChapterController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "ChapterController.saveChapter()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "ChapterController.saveChapter()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "ChapterController.saveChapter()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1);
         }
 
 
         //save chapter
         try {
-            Chapter chapter = null;
-            for (Chapter c : work.getChapters(chapterRepository)) {
-                if (c.getTitle().equals(chapterTitle)) {
-                    chapter = c;
-                }
+            Chapter chapter = chapterRepository.findById(chapterid).get();
+            if (chapter.getWork().getId().intValue() != work.getId()) {
+                throw new ChapterOwnershipException();
             }
-            if (chapter != null) {
-                chapter.writeHTML(content);
-                chapter.writeNotes(notes);
-                response.put("error", "none");
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            } else {
-                Log.create("Unrecognized chapter: " + chapterTitle, "ChapterController.saveChapter()", "info", null);
-            }
+            chapter.writeHTML(content);
+            chapter.writeNotes(notes);
+            response.put("error", "none");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IOException e) {
             Log.create(e.getMessage(), "ChapterController.saveChapter()", "error", e);
             response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) { //chapter does not exist
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "ChapterController.saveChapter()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (ChapterOwnershipException e) {
+            Log.create("chapter " + chapterid + " is not owned by work " + workid,
+                    "ChapterController.saveChapter()", "info", e);
+            response.put("error", "chapter " + chapterid + " is not owned by work " + workid);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-
-        Log.create("Failed to save chapter: " + chapterTitle, "ChapterController.saveChapter()", "error", null);
-        response.put("error", "Failed to save chapter");
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 
     //note: inputs {chaptername}
-    @PostMapping("/api/works/chapters/delete")
+    @PostMapping("/api/work/{workid}/chapter/{chapterid}/delete")
     public ResponseEntity<HashMap<String, Object>> deleteChapter(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid, @PathVariable int chapterid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -330,12 +322,10 @@ public class ChapterController {
         Account account;
         Work work;
 
-        //retrieve response data
-        String chapterTarget;
+        //retrieve token if applicable
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
-            chapterTarget = node.get("chaptername").asText();
             //token verification if included in request body
             if (node.has("token")) {
                 token = node.get("token").asText();
@@ -347,14 +337,26 @@ public class ChapterController {
         }
 
 
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "ChapterController.deleteChapter()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "ChapterController.deleteChapter()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "ChapterController.deleteChapter()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1);
         }
 
 

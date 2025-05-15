@@ -29,7 +29,7 @@ public class NoteCategory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
     @ElementCollection
-    public List<String> notes;
+    public List<String> notes; //todo convert this to its own table/object, we will need to have support for more varied stuff.
     private String categoryName;
     @ManyToOne
     private Work work;

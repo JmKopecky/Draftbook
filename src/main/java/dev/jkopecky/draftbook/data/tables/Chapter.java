@@ -32,7 +32,7 @@ public class Chapter implements Comparable<Chapter> {
 
 
     public void buildPath() {
-        path = work.getPath() + "chapters/";
+        path = work.getPath() + "chapters/" + id + "/";
     }
 
 

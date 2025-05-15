@@ -6,6 +6,140 @@
   align-items: center;
   justify-content: start;
   gap: 5vh;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
+  position: relative;
+  #nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: darken($primary, 5%);
+    height: 8vh;
+    width: 100%;
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.5s ease-in-out;
+    .nav-tile {
+      border-left: 1px solid $primary;
+      height: 100%;
+      width: 15vw;
+      transition: background 0.5s ease-in-out, border 0.5s ease-in-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .nav-tile.leftmost {
+      border-right: 1px solid $primary;
+    }
+    .nav-tile:hover {
+      background: darken($primary, 10%);
+    }
+    .nav-tile.active {
+      background: darken($primary, 15%);
+    }
+  }
+  @media (width <= 750px) {
+    #nav > .nav-tile {
+      width: 20vw;
+    }
+  }
+  @media (width <= 450px) {
+    #nav > .nav-tile {
+      width: 25vw;
+    }
+  }
+  .contentarea {
+    position: absolute;
+    top: 15vh;
+    width: 90%;
+    left: 5%;
+    right: 5%;
+    height: 72vh;
+  }
+  .contentarea[data-section="chapters"] {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 5vw;
+    #chapter-list-area {
+      flex: 1;
+      height: 96%;
+      overflow-y: scroll;
+      display: flex;
+      flex-flow: column;
+      align-items: center;
+      justify-content: start;
+      gap: 2vh;
+      padding-top: 2%;
+      padding-bottom: 2%;
+      .chapter-listing {
+        width: 100%;
+        display: flex;
+        flex-flow: row;
+        align-items: center;
+        justify-content: space-evenly;
+        .chapter-move-icons {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5em;
+          i {
+            font-size: 1.25em;
+            cursor: pointer;
+          }
+        }
+        .chapter-modification-icons {
+          display: flex;
+          flex-flow: row;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5em;
+          i {
+            font-size: 1.25em;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+    #chapter-create-area {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-flow: column;
+      align-items: center;
+      justify-content: space-evenly;
+    }
+  }
+  .background {
+    background: darken($primary, 5%);
+    border-radius: 1em;
+    transition: background 0.5s ease-in-out;
+  }
+}
+
+html.darkmode {
+  #nav {
+    background: lighten($secondary, 5%) !important;
+    .nav-tile:hover {
+      background: lighten($secondary, 10%) !important;
+    }
+    .nav-tile.active {
+      background: lighten($secondary, 15%) !important;
+    }
+    .nav-tile {
+      border-left: 1px solid $secondary !important;
+    }
+    .nav-tile.leftmost {
+      border-right: 1px solid $secondary !important;
+    }
+  }
+  .background {
+    background: lighten($secondary, 5%) !important;
+  }
 }

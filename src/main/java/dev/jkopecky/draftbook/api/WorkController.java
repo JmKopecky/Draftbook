@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 @Controller
 @CrossOrigin
@@ -37,7 +38,7 @@ public class WorkController {
 
 
 
-
+/*
     private Object getTargetWork(String target, Account account) {
         //retrieve work
         ArrayList<Work> works = account.getOwnedWorks(workRepository);
@@ -98,13 +99,13 @@ public class WorkController {
         }
         return works;
     }
+*/
 
 
 
-
-    @GetMapping("/api/works/work")
+    @GetMapping("/api/work/{workid}/retrieve")
     public ResponseEntity<HashMap<String, Object>> getWork(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -126,26 +127,38 @@ public class WorkController {
 
         Account account;
         Work work;
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "WorkController.getWork()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "WorkController.getWork()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "WorkController.getWork()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
         response.put("error", "none");
-        response.put("work", work); //todo test that this works correctly, sending the work object in json format to the client
+        response.put("work", work);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
 
-    @GetMapping("/api/works/chapters")
+    @GetMapping("/api/work/{workid}/retrievechapters")
     public ResponseEntity<HashMap<String, Object>> getChapters(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -160,33 +173,45 @@ public class WorkController {
                 token = node.get("token").asText();
             }
         } catch (IOException e) {
-            Log.create(e.getMessage(), "WorkController.renameWork()", "error", e);
+            Log.create(e.getMessage(), "WorkController.getChapters()", "error", e);
             response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         Account account;
         Work work;
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "WorkController.getChapters()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "WorkController.getChapters()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "WorkController.getChapters()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
 
         response.put("error", "none");
-        response.put("chapters", work.getChapters(chapterRepository)); //todo test that this works correctly
+        response.put("chapters", work.getChapters(chapterRepository));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
 
-    @GetMapping("/api/works/notecategories")
+    @GetMapping("/api/work/{workid}/retrievenotes")
     public ResponseEntity<HashMap<String, Object>> getNotes(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -210,35 +235,48 @@ public class WorkController {
 
         Account account;
         Work work;
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "WorkController.getChapters()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "WorkController.getChapters()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "WorkController.getChapters()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
+
 
         ArrayList<NoteCategory> noteCategories = new ArrayList<>();
         for (NoteCategory nc : noteCategoryRepository.findAll()) {
-            if (nc.getWork().equals(work)) {
+            if (nc.getWork().getId().intValue() == work.getId()) {
                 noteCategories.add(nc);
             }
         }
 
-        //retrieve chapters and reply
+        //retrieve notes and reply
         response.put("error", "none");
-        response.put("notecategories", noteCategories); //todo test that this works correctly
+        response.put("notecategories", noteCategories);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
 
 
-    @PostMapping("/api/works/rename")
+    @PostMapping("/api/work/{workid}/rename")
     public ResponseEntity<HashMap<String, Object>> renameWork(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -264,15 +302,28 @@ public class WorkController {
 
         Account account;
         Work work;
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "WorkController.renameWork()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "WorkController.renameWork()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "WorkController.renameWork()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
+
 
         boolean result = work.changeName(newName, workRepository);
         if (result) {
@@ -288,9 +339,9 @@ public class WorkController {
 
 
 
-    @PostMapping("/api/works/delete")
+    @PostMapping("/api/work/{workid}/delete")
     public ResponseEntity<HashMap<String, Object>> deleteWork(
-            @RequestParam(name = "target", required = true) String target,
+            @PathVariable int workid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
 
@@ -306,7 +357,7 @@ public class WorkController {
                 token = node.get("token").asText();
             }
         } catch (IOException e) {
-            Log.create(e.getMessage(), "WorkController.renameWork()", "error", e);
+            Log.create(e.getMessage(), "WorkController.deleteWork()", "error", e);
             response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
@@ -314,15 +365,28 @@ public class WorkController {
 
         Account account;
         Work work;
-        //auth
-        ArrayList<Object> container = getAccountAndWork(token, target);
-        if (container.size() == 1) {
-            response.put("error", container.get(0));
+        //authentication and work retrieval
+        try {
+            account = AuthenticationController.getByToken(token, authTokenRepository);
+            work = workRepository.findById(workid).get();
+            if (work.getAccount().getId().intValue() != account.getId()) {
+                Log.create("Work " + workid + " is not owned by account " + account.getId(),
+                        "WorkController.deleteWork()", "info", null);
+                response.put("error", "Work " + workid + " is not owned by account " + account.getId());
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchElementException e) {
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "WorkController.deleteWork()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "WorkController.deleteWork()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            account = (Account) container.get(0);
-            work = (Work) container.get(1); //todo see if this can be adapted to the above get mappings to reduce boilerplate.
         }
+
 
         boolean result = work.delete(workRepository);
         if (result) {
@@ -336,7 +400,7 @@ public class WorkController {
 
 
 
-    @PostMapping("/api/works/create")
+    @PostMapping("/api/work/create")
     public ResponseEntity<HashMap<String, Object>> createWork(
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
@@ -360,20 +424,24 @@ public class WorkController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        //auth
         Account account;
+        //authentication
         try {
             account = AuthenticationController.getByToken(token, authTokenRepository);
-        } catch (Exception _) {
-            response.put("error", "unauthorized");
+        } catch (Exception e) {
+            Log.create("Authentication Exception: " + e.getMessage(),
+                    "WorkController.createWork()", "info", e);
+            response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
 
-        Work work = null;
+        Work work;
         try {
             work = Work.createWork(account, title, workRepository);
         } catch (IOException e) {
+            Log.create("Storage Exception: " + e.getMessage(),
+                    "WorkController.createWork()", "error", e);
             response.put("error", "storage_exception");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }

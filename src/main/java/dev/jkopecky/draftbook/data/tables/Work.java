@@ -49,10 +49,9 @@ public class Work {
 
     public void createWorkFile() throws IOException {
         try {
-            //create initial file based on title, and save the work object for data redundancy.
+            //create initial file based on id, and save the work object for data redundancy.
             ObjectMapper mapper = new ObjectMapper();
             String fullPath = path + id + ".json";
-            System.out.println(fullPath);
             Files.createDirectories(Paths.get(path));
             File file = new File(fullPath);
             mapper.writeValue(file, this);
@@ -77,16 +76,18 @@ public class Work {
         chapter.setTitle(title);
         chapter.setWork(this);
         chapter.setNumber(index);
+        chapterRepository.save(chapter);
         chapter.buildPath();
 
         //check if chapter is unique
         for (Chapter c : chapters) {
             if (c.getPath().equals(chapter.getPath())) {
-                //a chapter already exists under the same name.
-                String message = "A chapter (" + c.getTitle() + ") already exists under the same internal name.";
+                //a chapter already exists under the same id.
+                String message = "A chapter (" + c.getTitle() + ") already exists under the same internal id.";
                 message += "\n\t - Work: " + this.getTitle();
                 message += "\n\t - Account: " + this.getAccount().getEmail();
                 Log.create(message, "Work.createChapter()", "info", null);
+                chapterRepository.delete(chapter);
                 throw new FileAlreadyExistsException(message);
             }
         }
@@ -148,7 +149,7 @@ public class Work {
     public ArrayList<Chapter> getChapters(ChapterRepository chapterRepository) {
         ArrayList<Chapter> output = new ArrayList<>();
         for (Chapter c : chapterRepository.findAll()) {
-            if (this.getPath().equals(c.getWork().getPath())) { //if path matches, it is the same work.
+            if (this.getId() == c.getWork().getId()) { //if path matches, it is the same work.
                 output.add(c);
             }
         }

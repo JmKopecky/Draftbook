@@ -24,84 +24,19 @@ public class WorkController {
     ChapterRepository chapterRepository;
     NoteCategoryRepository noteCategoryRepository;
     AuthTokenRepository authTokenRepository;
-    public WorkController(AccountRepository accountRepository, WorkRepository workRepository, ChapterRepository chapterRepository, NoteCategoryRepository noteCategoryRepository, AuthTokenRepository authTokenRepository) {
+    NoteRepository noteRepository;
+    public WorkController(AccountRepository accountRepository, WorkRepository workRepository, ChapterRepository chapterRepository, NoteCategoryRepository noteCategoryRepository, AuthTokenRepository authTokenRepository, NoteRepository noteRepository) {
         this.accountRepository = accountRepository;
         this.workRepository = workRepository;
         this.chapterRepository = chapterRepository;
         this.noteCategoryRepository = noteCategoryRepository;
         this.authTokenRepository = authTokenRepository;
+        this.noteCategoryRepository = noteCategoryRepository;
     }
 
 
 
     //note: work wide api calls
-
-
-
-/*
-    private Object getTargetWork(String target, Account account) {
-        //retrieve work
-        ArrayList<Work> works = account.getOwnedWorks(workRepository);
-        for (Work work : works) {
-            if (("" + work.getId()).equals(target)) {
-                //found the work
-                return work;
-            }
-        }
-
-        //if this point is reached, the work was not found in the user's list of works
-        Log.create("Failed to find work " + target + " in account work list.",
-                "WorkController.getWork()", "info", null);
-        return "unrecognized_work";
-    }
-
-
-
-    public ArrayList<Object> getAccountAndWork(String token, String target) {
-        ArrayList<Object> output = new ArrayList<>();
-        String error = "none";
-
-        //confirm user credentials
-        Account account;
-        try {
-            account = AuthenticationController.getByToken(token, authTokenRepository);
-        } catch (Exception e) {
-            //failed to retrieve account;
-            error = "Failed to match auth token to account";
-            output.add(error);
-            return output;
-        }
-
-        //retrieve work
-        Work work;
-        Object workResult = getTargetWork(target, account);
-        if (workResult instanceof Work w) {
-            work = w;
-        } else {
-            error = "" + workResult;
-            output.add(error);
-            return output;
-        }
-        output.add(account);
-        output.add(work);
-        output.add(error);
-        return output;
-    }
-
-
-
-    public static ArrayList<Work> getOwnedWorks(Account account, WorkRepository repository) {
-        ArrayList<Work> works = new ArrayList<>();
-        for (Work work : repository.findAll()) {
-            if (work.getAccount().getId().equals(account.getId())) {
-                works.add(work);
-            }
-        }
-        return works;
-    }
-*/
-
-
 
     @GetMapping("/api/work/{workid}/retrieve")
     public ResponseEntity<HashMap<String, Object>> getWork(
@@ -209,8 +144,8 @@ public class WorkController {
 
 
 
-    @GetMapping("/api/work/{workid}/retrievenotes")
-    public ResponseEntity<HashMap<String, Object>> getNotes(
+    @GetMapping("/api/work/{workid}/retrievenotecategories")
+    public ResponseEntity<HashMap<String, Object>> getNoteCategories(
             @PathVariable int workid,
             @CookieValue(value = "token", defaultValue = "null") String token,
             @RequestBody String data) {
@@ -258,12 +193,15 @@ public class WorkController {
         }
 
 
-        ArrayList<NoteCategory> noteCategories = new ArrayList<>();
-        for (NoteCategory nc : noteCategoryRepository.findAll()) {
-            if (nc.getWork().getId().intValue() == work.getId()) {
-                noteCategories.add(nc);
+        ArrayList<HashMap<String, Note>> noteCategories = new ArrayList<>();
+        for (NoteCategory nc : noteCategoryRepository.findByWork_Id(work.getId())) {
+            HashMap<String, Note> categoryAsMap = new HashMap<>();
+            for (String id : nc.getNotes()) {
+                categoryAsMap.put(id, noteRepository.findById(Integer.parseInt(id)).get());
             }
+            noteCategories.add(categoryAsMap);
         }
+
 
         //retrieve notes and reply
         response.put("error", "none");

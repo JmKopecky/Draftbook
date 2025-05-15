@@ -187,10 +187,12 @@ public class ChapterController {
         Account account;
         Work work;
 
+        String name;
         //retrieve token if applicable
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(data);
+            name = node.get("newname").asText();
             //token verification if included in request body
             if (node.has("token")) {
                 token = node.get("token").asText();
@@ -223,7 +225,27 @@ public class ChapterController {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
-        return null; //todo implement
+
+        //find and rename chapter
+        try {
+            Chapter chapter = chapterRepository.findById(chapterid).get();
+            if (chapter.getWork().getId().intValue() != work.getId()) {
+                throw new ChapterOwnershipException();
+            }
+            chapter.rename(name, chapterRepository);
+            response.put("error", "none");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (NoSuchElementException e) { //chapter does not exist
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "ChapterController.renameChapter()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (ChapterOwnershipException e) {
+            Log.create("chapter " + chapterid + " is not owned by work " + workid,
+                    "ChapterController.renameChapter()", "info", e);
+            response.put("error", "chapter " + chapterid + " is not owned by work " + workid);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 
 
@@ -360,6 +382,25 @@ public class ChapterController {
         }
 
 
-        return null; //todo implement
+        //find and delete chapter
+        try {
+            Chapter chapter = chapterRepository.findById(chapterid).get();
+            if (chapter.getWork().getId().intValue() != work.getId()) {
+                throw new ChapterOwnershipException();
+            }
+            chapter.delete(chapterRepository);
+            response.put("error", "none");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (NoSuchElementException e) { //chapter does not exist
+            Log.create("Attempted to resolve work " + workid + ", but it does not exist",
+                    "ChapterController.deleteChapter()", "info", null);
+            response.put("error", "unrecognized_work");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (ChapterOwnershipException e) {
+            Log.create("chapter " + chapterid + " is not owned by work " + workid,
+                    "ChapterController.deleteChapter()", "info", e);
+            response.put("error", "chapter " + chapterid + " is not owned by work " + workid);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 }

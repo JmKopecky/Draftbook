@@ -36,7 +36,7 @@ function createChapter() {
         return;
     }
     let workId = document.getElementById("workid").textContent.split(" ").findLast(() => true);
-    fetch("/api/works/chapters/create?target=" + workId, {
+    fetch(`/api/work/${workId}/chapter/create`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

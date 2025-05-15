@@ -4,6 +4,8 @@ package dev.jkopecky.draftbook.data.tables;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jkopecky.draftbook.Log;
 import jakarta.persistence.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Entity
 public class NoteCategory {
@@ -29,7 +32,7 @@ public class NoteCategory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
     @ElementCollection
-    public List<String> notes; //todo convert this to its own table/object, we will need to have support for more varied stuff.
+    public List<String> notes; //list of note ids
     private String categoryName;
     @ManyToOne
     private Work work;
@@ -37,173 +40,83 @@ public class NoteCategory {
 
 
 
+    public String findPath() {
+        return work.getPath() + "notes/" + id + "/";
+    }
+
+
 
     public static NoteCategory create(NoteCategoryRepository noteCategoryRepository, Work work, String categoryName) throws IOException {
-
         //create category
         NoteCategory category = new NoteCategory();
         category.setWork(work);
         category.setNotes(new ArrayList<>());
         category.setCategoryName(categoryName);
+        noteCategoryRepository.save(category);
 
-        //create file of category data copy
-        ObjectMapper mapper = new ObjectMapper();
-        String path = category.findPath() + ".json";
-        File rootFile = new File(path);
+        //todo implement automatic refresh of data from backup files if a recovery variable/setting is enabled
 
-        if (rootFile.isFile()) { //file already exists, read data from it instead of creating a new one
-
-            try { //attempt to retrieve preexisting data copy
-                category = mapper.readValue(rootFile, NoteCategory.class);
-            } catch (Exception e) { //failed to fully read data from file.
-                try { //in this case, override the preexisting file with the default data.
-                    Files.createDirectories(Paths.get(path));
-                    mapper.writeValue(rootFile, category);
-                } catch (IOException io) {
-                    Log.create("Failed to create noteCategory file for data copy.", "NoteCategory.create()", "warn", e);
-                    throw io;
-                }
-            }
-
-            try { //since the category already exists, attempt to retrieve existing notes as well.
-                refreshNotes(category);
-            } catch (IOException e) {
-                Log.create(e.getMessage(), "NoteCategory.create() {unspecified log 1}", "error", e);
-                throw e;
-            }
-
-        } else { //file does not already exist, create a new one with the default data
-            try {
-                path = category.findPath();
-                Files.createDirectories(Paths.get(path));
-                path += ".json";
-                rootFile = new File(path);
-                mapper.writeValue(rootFile, category);
-            } catch (IOException e) {
-                Log.create(e.getMessage(), "NoteCategory.create() {unspecified log 2}", "error", e);
-                throw e;
-            }
+        try {
+            String backupFilePath = category.findPath();
+            Files.createDirectories(Paths.get(backupFilePath));
+            backupFilePath += "category_" + category.getId() + ".json";
+            File rootFile = new File(backupFilePath);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.writeValue(rootFile, category);
+        } catch (IOException e) {
+            Log.create(e.getMessage(), "NoteCategory.create() {unspecified log 2}", "error", e);
+            noteCategoryRepository.delete(category);
+            throw e;
         }
 
-        noteCategoryRepository.save(category);
         return category;
     }
 
 
-
-    public String findPath() {
-        return work.getPath() + "notes/" + categoryName;
-    }
-
-
-
-    public static ArrayList<NoteCategory> getWorkNoteCategories(Work work, NoteCategoryRepository noteCategoryRepository) {
-        ArrayList<NoteCategory> categories = new ArrayList<>();
-        for (NoteCategory noteCategory : noteCategoryRepository.findAll()) {
-            if (noteCategory.work.equals(work)) {
-                categories.add(noteCategory);
+    public boolean delete(NoteRepository noteRepository, NoteCategoryRepository noteCategoryRepository) {
+        //delete
+        for (String noteid : this.getNotes()) {
+            try {
+                Note note = noteRepository.findById(Integer.parseInt(noteid)).get();
+                note.deleteNote(noteRepository, noteCategoryRepository);
+            } catch (NumberFormatException e) {
+                Log.create("Attempted to delete note " + noteid + ", but it cannot be converted to an id",
+                        "NoteController.deleteCategory()", "info", null);
+                return false;
+            } catch (NoSuchElementException e) {
+                Log.create("Attempted to resolve note " + noteid + ", but it does not exist",
+                        "NoteController.deleteCategory()", "info", null);
+                return false;
             }
         }
-        return categories;
+        new File(this.findPath() + ".json").delete();
+        new File(this.findPath()).delete();
+        noteCategoryRepository.delete(this);
+        return true;
     }
 
 
 
-    public static void refreshNotes(NoteCategory category) throws IOException {
-        //access existing notes
-        String path = category.findPath() + "/";
-        File noteDir = new File(path);
-        if (noteDir.exists() && noteDir.isDirectory()) {
-            //read all, replacing preexisting notes with new ones
-            File[] files = noteDir.listFiles();
-            if (files != null && files.length > 0) {
-                category.getNotes().clear();
-                for (File file : files) {
-                    category.getNotes().add(file.getName().substring(0, file.getName().lastIndexOf(".")));
-                }
-            } else {
-                //no notes exist, clear.
-                category.notes.clear();
-            }
-        } else {
-            //directory has not been created, create it.
-            Files.createDirectories(Paths.get(path));
+    public void learnNote(Note note, NoteCategoryRepository noteCategoryRepository) {
+        if (!notes.contains("" + note.getId())) {
+            notes.addLast("" + note.getId());
         }
-    }
-
-
-
-    public void renameNote(String oldNote, String newNote, NoteCategoryRepository noteCategoryRepository) throws FileAlreadyExistsException, FileNotFoundException {
-        if (!this.getNotes().contains(oldNote)) { //make sure that it exists first.
-            Log.create("Attempted to rename note that does not exist", "NoteCategory.renameNote()", "debug", null);
-            throw new FileNotFoundException("Attempted to rename note that does not exist");
-        }
-
-        File oldFile = new File(this.findPath() + "/" + oldNote + ".txt");
-        File newFile = new File(this.findPath() + "/" + newNote + ".txt");
-        if (newFile.exists()) {
-            String message = "file " + newNote + " already exists";
-            Log.create(message, "NoteCategory.renameNote()", "debug", null);
-            throw new FileAlreadyExistsException(message);
-        }
-
-        try {
-            oldFile.renameTo(newFile);
-        } catch (Exception e) {
-            Log.create(e.getMessage(), "NoteCategory.renameNote()", "error", e);
-            throw e;
-        }
-
-        this.getNotes().set(this.getNotes().indexOf(oldNote), newNote);
         noteCategoryRepository.save(this);
     }
 
 
-
-    public void deleteNote(String target, NoteCategoryRepository noteCategoryRepository) throws IOException {
-        if (!this.getNotes().contains(target)) { //make sure that it exists first
-            String message = "Note " + target + " does not exist.";
-            Log.create(message, "NoteCategory.deleteNote()", "debug", null);
-            throw new FileNotFoundException(message);
+    public void forgetNote(Note note, NoteCategoryRepository noteCategoryRepository) {
+        if (!notes.contains("" + note.getId())) {
+            notes.remove("" + note.getId());
         }
-
-        File file = new File(findPath() + "/" + target + ".txt");
-        if (!file.exists()) { //does not exist, remove it from notes list and do nothing.
-            this.getNotes().remove(target);
-            noteCategoryRepository.save(this);
-            String message = "Note " + target + " does not exist.";
-            Log.create(message, "NoteCategory.deleteNote()", "debug", null);
-            throw new FileNotFoundException(message);
-        }
-
-        try {
-            file.delete();
-        } catch (Exception e) {
-            Log.create(e.getMessage(), "NoteCategory.deleteNote() {unspecified log 1}", "error", null);
-            throw e;
-        }
-
-        this.getNotes().remove(target);
         noteCategoryRepository.save(this);
     }
 
 
-
-    public void addNote(String noteTitle, String content, NoteCategoryRepository repository) throws IOException {
-        File noteFile = new File(this.findPath() + "/" + noteTitle + ".txt"); //define file target
-
-        try {
-            FileWriter fileWriter = new FileWriter(noteFile);
-            fileWriter.write(content);
-            fileWriter.close();
-            notes.add(noteTitle);
-            repository.save(this);
-        } catch (IOException e) {
-            Log.create(e.getMessage(), "NoteCategory.addNote()", "error", e);
-            throw e;
-        }
+    public void rename(String newName, NoteCategoryRepository noteCategoryRepository) {
+        setCategoryName(newName);
+        noteCategoryRepository.save(this);
     }
-
 
 
     public Integer getId() {

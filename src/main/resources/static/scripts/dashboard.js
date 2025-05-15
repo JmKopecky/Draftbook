@@ -37,7 +37,7 @@ function createWork() {
         return;
     }
 
-    fetch("/api/works/create", {
+    fetch("/api/work/create", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -70,7 +70,7 @@ function renameWork(elem) {
         return;
     }
 
-    fetch("/api/works/rename?target=" + workElem.getAttribute("data-work"), {
+    fetch(`/api/work/${workElem.getAttribute("data-work")}/rename`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -90,7 +90,7 @@ function renameWork(elem) {
 function deleteWork(elem) {
     let workElem = elem.parentElement;
 
-    fetch("/api/works/delete?target=" + workElem.getAttribute("data-work"), {
+    fetch(`/api/work/${workElem.getAttribute("data-work")}/delete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

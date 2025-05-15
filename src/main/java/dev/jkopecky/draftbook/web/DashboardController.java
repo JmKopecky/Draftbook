@@ -54,7 +54,7 @@ public class DashboardController {
             model.addAttribute("section", "statistics");
         }
 
-        ArrayList<Work> works = WorkController.getOwnedWorks(account, workRepository);
+        ArrayList<Work> works = new ArrayList<>(workRepository.findByAccount_Id(account.getId()));
         model.addAttribute("works", works);
 
         return "dashboard";

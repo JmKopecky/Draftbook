@@ -63,7 +63,7 @@ public class Work {
 
 
 
-    public void createChapter(String title, int index, ChapterRepository chapterRepository) throws IOException {
+    public Chapter createChapter(String title, int index, ChapterRepository chapterRepository) throws IOException {
         //retrieve all chapters and determine the location to add the new one.
         ArrayList<Chapter> chapters = getChapters(chapterRepository);
 
@@ -79,25 +79,12 @@ public class Work {
         chapterRepository.save(chapter);
         chapter.buildPath();
 
-        //check if chapter is unique
-        for (Chapter c : chapters) {
-            if (c.getPath().equals(chapter.getPath())) {
-                //a chapter already exists under the same id.
-                String message = "A chapter (" + c.getTitle() + ") already exists under the same internal id.";
-                message += "\n\t - Work: " + this.getTitle();
-                message += "\n\t - Account: " + this.getAccount().getEmail();
-                Log.create(message, "Work.createChapter()", "info", null);
-                chapterRepository.delete(chapter);
-                throw new FileAlreadyExistsException(message);
-            }
-        }
-
         //create files for chapters
         ObjectMapper mapper = new ObjectMapper();
 
         //save chapter object file
         try {
-            String path = chapter.getPath() + "chapter_" + Util.toInternalResource(chapter.getTitle()) + ".json";
+            String path = chapter.getPath() + "chapter_" + chapter.getId() + ".json";
             Files.createDirectories(Paths.get(chapter.getPath()));
             File file = new File(path);
             mapper.writeValue(file, chapter);
@@ -110,7 +97,7 @@ public class Work {
 
         //create file for the chapter's body
         try {
-            String path = chapter.getPath() + "chapter_" + Util.toInternalResource(chapter.getTitle()) + ".txt";
+            String path = chapter.getPath() + "chapter_" + chapter.getId() + ".txt";
             Files.createDirectories(Paths.get(chapter.getPath()));
             File file = new File(path);
             file.createNewFile();
@@ -123,7 +110,7 @@ public class Work {
 
         //create file for chapter-specific notes
         try {
-            String path = chapter.getPath() + "note_" + Util.toInternalResource(chapter.getTitle()) + ".txt";
+            String path = chapter.getPath() + "note_" + chapter.getId() + ".txt";
             Files.createDirectories(Paths.get(chapter.getPath()));
             File file = new File(path);
             file.createNewFile();
@@ -142,17 +129,14 @@ public class Work {
         chapterConfirmationLog += "\n\t - Work: " + this.getTitle();
         chapterConfirmationLog += "\n\t - Account: " + this.getAccount().getEmail();
         Log.create(chapterConfirmationLog, "Work.createChapter", "debug", null);
+
+        return chapter;
     }
 
 
 
     public ArrayList<Chapter> getChapters(ChapterRepository chapterRepository) {
-        ArrayList<Chapter> output = new ArrayList<>();
-        for (Chapter c : chapterRepository.findAll()) {
-            if (this.getId() == c.getWork().getId()) { //if path matches, it is the same work.
-                output.add(c);
-            }
-        }
+        ArrayList<Chapter> output = new ArrayList<>(chapterRepository.findByWork_Id(this.getId()));
         Collections.sort(output); //sort output in increasing order by number.
         return output;
     }

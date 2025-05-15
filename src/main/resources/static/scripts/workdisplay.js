@@ -35,7 +35,7 @@ function createChapter() {
         chapterNumberInput.focus();
         return;
     }
-    let workId = document.getElementById("workid").textContent.split(" ").findLast(() => true);
+    let workId = document.getElementById("workid").getAttribute("data-workid");
     fetch(`/api/work/${workId}/chapter/create`, {
         method: 'POST',
         headers: {
@@ -47,7 +47,90 @@ function createChapter() {
         }),
     }).then((r) => {
         r.json().then(data => {
-            console.log(data);
+            let chapterId = data["chapter_id"];
+            let chapterName = data["chapter_name"];
+            let newChapterListing =
+                `
+                <div class="chapter-listing" data-chapter="${chapterId}">
+                    <div class="chapter-move-icons">
+                        <i class="fa-solid fa-up-long"></i>
+                        <i class="fa-solid fa-down-long"></i>
+                    </div>
+                    <form onsubmit="renameChapter(this); return false;">
+                        <input class="chapter-name-input" value="${chapterName}" readonly>
+                    </form>
+                    <div class="chapter-modification-icons">
+                        <i class="fa-solid fa-i-cursor" onclick="renameChapter(this)"></i>
+                        <i class="fa-solid fa-trash" onclick="deleteChapter(this)"></i>
+                    </div>
+                    <button onclick="openChapter(this)">Edit</button>
+                </div>
+                `
+            document.getElementById("chapter-list-area").innerHTML += newChapterListing;
         });
     });
+}
+
+
+function renameChapter(elem) {
+    let chapterContainer = elem.parentElement;
+    if (!chapterContainer.classList.contains("chapter-listing")) {
+        chapterContainer = chapterContainer.parentElement;
+    }
+
+    let chapterId = chapterContainer.getAttribute("data-chapter");
+    let workId = document.getElementById("workid").getAttribute("data-workid");
+    let input = chapterContainer.getElementsByTagName("form")[0].getElementsByTagName("input")[0];
+    if (input.readOnly === true) {
+        input.readOnly = false;
+        return;
+    }
+    if (input.value === "") {
+        input.focus();
+        return;
+    }
+    fetch(`/api/work/${workId}/chapter/${chapterId}/rename`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            newname:  input.value
+        }),
+    }).then((r) => {
+        r.json().then(data => {
+            console.log(data);
+            input.readOnly = true;
+        });
+    });
+}
+
+
+
+function deleteChapter(elem) {
+    let chapterContainer = elem.parentElement.parentElement;
+    let chapterId = chapterContainer.getAttribute("data-chapter");
+    let workId = document.getElementById("workid").getAttribute("data-workid");
+    fetch(`/api/work/${workId}/chapter/${chapterId}/delete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            empty: true
+        }),
+    }).then((r) => {
+        r.json().then(data => {
+            if (data["error"] === "none") {
+                chapterContainer.remove();
+            }
+        });
+    });
+}
+
+
+function openChapter(elem) {
+    let chapterContainer = elem.parentElement;
+    let chapterId = chapterContainer.getAttribute("data-chapter");
+    swup.navigate(`/chapter/${chapterId}`);
 }

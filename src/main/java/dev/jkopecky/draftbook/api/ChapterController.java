@@ -89,14 +89,17 @@ public class ChapterController {
 
 
         //create chapter
+        Chapter chapter;
         try {
-            work.createChapter(chapterName, chapterNumber, chapterRepository);
+            chapter = work.createChapter(chapterName, chapterNumber, chapterRepository);
         } catch (IOException e) {
             response.put("error", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         response.put("error", "none");
+        response.put("chapter_id", chapter.getId());
+        response.put("chapter_name", chapter.getTitle());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

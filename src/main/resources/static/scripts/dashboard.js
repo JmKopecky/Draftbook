@@ -49,7 +49,17 @@ function createWork() {
         r.json().then(data => {
             if (data["workid"] !== undefined) {
                 let newWorkId = data["workid"];
-                console.log(newWorkId);
+                let newWorkTitle = data["workname"];
+                let newElemString =
+                    `
+                    <div class="content-tile work-display-tile" data-section="works" style="display: flex;"  data-work="${newWorkId}">
+                        <form onsubmit="renameWork(this); return false;"><input class="work-title" value="${newWorkTitle}" readonly></form>
+                        <i class="fa-solid fa-i-cursor" onclick="renameWork(this)"></i>
+                        <i class="fa-solid fa-trash" onclick="deleteWork(this)"></i>
+                        <button onclick="openWork(this)">Open Work</button>
+                    </div>
+                    `
+                document.getElementById("work-list-container").innerHTML += newElemString;
             }
         });
     });

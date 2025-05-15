@@ -386,6 +386,7 @@ public class WorkController {
 
         response.put("error", "none");
         response.put("workid", work.getId());
+        response.put("workname", work.getTitle());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

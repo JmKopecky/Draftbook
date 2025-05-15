@@ -82,19 +82,21 @@
                 <h1>Billing</h1>
             </div>
             <!-- Works -->
-            <div class="content-tile work-display-tile" data-section="works" th:each="work:${works}" th:style="${section.equals('works') ? 'display: flex;' : 'display: none;'}"  th:data-work="${work.getId()}">
-                <form onsubmit="renameWork(this); return false;"><input class="work-title" th:value="${work.getTitle()}" readonly></form>
-                <i class="fa-solid fa-i-cursor" onclick="renameWork(this)"></i>
-                <i class="fa-solid fa-trash" onclick="deleteWork(this)"></i>
-                <button onclick="openWork(this)">Open Work</button>
+            <div id="work-list-container" class="content-tile" data-section="works" th:style="${section.equals('works') ? 'display: flex;' : 'display: none;'}">
+                <div class="work-display-tile content-tile" th:each="work:${works}" th:data-work="${work.getId()}">
+                    <form onsubmit="renameWork(this); return false;"><input class="work-title" th:value="${work.getTitle()}" readonly></form>
+                    <i class="fa-solid fa-i-cursor" onclick="renameWork(this)"></i>
+                    <i class="fa-solid fa-trash" onclick="deleteWork(this)"></i>
+                    <button onclick="openWork(this)">Open Work</button>
+                </div>
             </div>
-            <div class="content-tile" data-section="works" th:style="${section.equals('works') ? 'display: flex;' : 'display: none;'}">
+
+            <div id="work-new-tile" class="content-tile" data-section="works" th:style="${section.equals('works') ? 'display: flex;' : 'display: none;'}">
                 <h3>Create New Work</h3>
                 <div id="work-new-input-container">
                     <input placeholder="Work title" alt="work title" id="new-work-title-input">
                     <button onclick="createWork()">Create</button>
                 </div>
-
             </div>
             <!-- Statistics -->
             <div class="content-tile" data-section="statistics" th:style="${section.equals('statistics') ? 'display: flex;' : 'display: none;'}">

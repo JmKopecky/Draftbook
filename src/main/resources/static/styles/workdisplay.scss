@@ -94,6 +94,9 @@
             cursor: pointer;
           }
         }
+        form > input:read-only {
+          border-bottom-color: transparent;
+        }
         .chapter-modification-icons {
           display: flex;
           flex-flow: row;

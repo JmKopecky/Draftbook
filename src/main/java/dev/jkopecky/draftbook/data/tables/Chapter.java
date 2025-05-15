@@ -39,7 +39,7 @@ public class Chapter implements Comparable<Chapter> {
 
     public String retrieveAsHTML() throws IOException {
         try {
-            String fullPath = path + "chapter_" + Util.toInternalResource(getTitle()) + ".txt";
+            String fullPath = path + "chapter_" + id + ".txt";
             File file = new File(fullPath);
             return Files.readString(file.toPath());
         } catch (IOException e) {
@@ -52,7 +52,7 @@ public class Chapter implements Comparable<Chapter> {
 
     public void writeHTML(String html) throws IOException {
         try {
-            String fullPath = path + "chapter_" + Util.toInternalResource(getTitle()) + ".txt";
+            String fullPath = path + "chapter_" + id + ".txt";
             File file = new File(fullPath);
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(html);
@@ -67,7 +67,7 @@ public class Chapter implements Comparable<Chapter> {
 
     public void writeNotes(String notes) throws IOException {
         try {
-            String fullPath = path + "note_" + Util.toInternalResource(getTitle()) + ".txt";
+            String fullPath = path + "note_" + id + ".txt";
             File file = new File(fullPath);
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(notes);
@@ -82,7 +82,7 @@ public class Chapter implements Comparable<Chapter> {
 
     public String readNotes() throws IOException {
         try {
-            String fullPath = path + "note_" + Util.toInternalResource(getTitle()) + ".txt";
+            String fullPath = path + "note_" + id + ".txt";
             File file = new File(fullPath);
             return Files.readString(file.toPath());
         } catch (IOException e) {
@@ -100,9 +100,9 @@ public class Chapter implements Comparable<Chapter> {
 
 
     public boolean delete(ChapterRepository chapterRepository) {
-        File backupFile = new File(path + "chapter_" + Util.toInternalResource(title) + ".json");
-        File htmlFile = new File(path + "chapter_" + Util.toInternalResource(title) + ".txt");
-        File noteFile = new File(path + "note_" + Util.toInternalResource(title) + ".txt");
+        File backupFile = new File(path + "chapter_" + id + ".json");
+        File htmlFile = new File(path + "chapter_" + id + ".txt");
+        File noteFile = new File(path + "note_" + id + ".txt");
         try {
             backupFile.delete();
             htmlFile.delete();
@@ -118,61 +118,19 @@ public class Chapter implements Comparable<Chapter> {
 
 
     public boolean rename(String name, ChapterRepository chapterRepository) {
-        File newHtmlFile = new File(path + "chapter_" + Util.toInternalResource(name) + ".txt");
-        File newNoteFile = new File(path + "note_" + Util.toInternalResource(name) + ".txt");
-
-        //check if this name is already in use
-        if (newHtmlFile.isFile() || newNoteFile.isFile() || name.equals(this.title)) {
-            // title already in use by either this or another chapter, do not change.
-            Log.create("Attempted to rename chapter " + this.title + " to a name " + name + " that already exists", "Chapter.rename()", "info", null);
-            return false;
-        }
-
-        //transfer content to new files
-        try {
-            File oldHtmlFile = new File(path + "note_" + Util.toInternalResource(getTitle()) + ".txt");
-            FileWriter fileWriter = new FileWriter(newHtmlFile);
-            fileWriter.write(Files.readString(oldHtmlFile.toPath()));
-            fileWriter.close();
-        } catch (IOException e) {
-            Log.create("Error while transferring HTML content to new file", "Chapter.rename()", "info", null);
-            newHtmlFile.delete();
-            return false;
-        }
-
-        try {
-            File oldNotesFile = new File(path + "chapter_" + Util.toInternalResource(getTitle()) + ".txt");
-            FileWriter fileWriter = new FileWriter(newNoteFile);
-            fileWriter.write(Files.readString(oldNotesFile.toPath()));
-            fileWriter.close();
-        } catch (IOException e) {
-            Log.create("Error while transferring note content to new file", "Chapter.rename()", "info", null);
-            newHtmlFile.delete();
-            newNoteFile.delete();
-            return false;
-        }
-
+        //write to data backup file
         String oldTitle = title;
         title = name;
-
-        //write to data backup file
         ObjectMapper mapper = new ObjectMapper();
-        File newDataBackup = new File(path + "chapter_" + Util.toInternalResource(name) + ".json");
+        File newDataBackup = new File(path + "chapter_" + id + ".json");
         try {
             mapper.writeValue(newDataBackup, this);
-            File oldDataBackup = new File(path + "chapter_" + Util.toInternalResource(oldTitle) + ".json");
-            oldDataBackup.delete();
         } catch (IOException e) {
             Log.create("Error while transferring backup content to new file", "Chapter.rename()", "info", null);
-            newHtmlFile.delete();
-            newNoteFile.delete();
-            newDataBackup.delete();
             title = oldTitle;
             return false;
         }
-
         chapterRepository.save(this);
-
         return true;
     }
 

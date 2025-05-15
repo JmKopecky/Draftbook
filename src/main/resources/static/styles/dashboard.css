@@ -425,6 +425,7 @@ pre {
   gap: 5vh;
   min-height: 100%;
   flex: 1;
+  padding-bottom: 3vh;
 }
 #site-content #account-main-content .content-tile {
   width: 90%;
@@ -449,6 +450,17 @@ pre {
 }
 #site-content #account-main-content .content-tile #work-new-input-container input {
   flex: 1;
+}
+#site-content #account-main-content #work-list-container {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 100%;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: start;
+  gap: 5vh;
 }
 #site-content #account-main-content .work-display-tile {
   flex-flow: row !important;
@@ -484,7 +496,7 @@ html.darkmode #site-content > #account-nav-sidebar .nav-item:hover {
 html.darkmode #site-content > #account-nav-sidebar .nav-item.active {
   background: rgb(67.0161290323, 71.4838709677, 67.0161290323) !important;
 }
-html.darkmode #site-content > #account-main-content > .content-tile {
+html.darkmode #site-content > #account-main-content .content-tile {
   box-shadow: 1px 1px 1px 1px rgb(17.6612903226, 18.8387096774, 17.6612903226) !important;
   background: rgb(42.3387096774, 45.1612903226, 42.3387096774) !important;
 }

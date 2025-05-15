@@ -50,7 +50,7 @@
             Synopsis
             Word Count
             -->
-            <p id="workid" th:text="${'Internal Resource ID: ' + work.getId()}"></p>
+            <p id="workid" th:text="${'Internal Resource ID: ' + work.getId()}" th:data-workid="${work.getId()}"></p>
         </div>
         <div class="contentarea" data-section="chapters" th:style="${section.equals('chapters') ? 'display: flex;' : 'display: none;'}">
             <div id="chapter-list-area" class="background">
@@ -60,7 +60,7 @@
                         <i class="fa-solid fa-down-long"></i>
                     </div>
                     <form onsubmit="renameChapter(this); return false;">
-                        <input class="chapter-name-input" th:value="${chapter.getTitle()}">
+                        <input class="chapter-name-input" th:value="${chapter.getTitle()}" readonly>
                     </form>
                     <div class="chapter-modification-icons">
                         <i class="fa-solid fa-i-cursor" onclick="renameChapter(this)"></i>

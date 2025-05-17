@@ -13,7 +13,7 @@ span, p {
   font-weight: 400;
   font-style: normal;
   color: #1E201E;
-  font-size: 1.07em;
+  font-size: 16px;
   transition: color 0.5s ease-in-out;
 }
 
@@ -66,6 +66,7 @@ strong {
 em {
   font-family: "Nunito", sans-serif;
   font-optical-sizing: auto;
+  font-style: italic;
 }
 
 .title {
@@ -142,7 +143,7 @@ h6 {
   font-size: 0.75em;
 }
 
-button {
+button:not([class*=ql]) {
   border: 1px solid transparent;
   background: #5B3C36;
   border-radius: 0.25em;
@@ -157,7 +158,7 @@ button {
   cursor: pointer;
 }
 
-button:hover, button:focus, button:active {
+button:not([class*=ql]):hover, button:not([class*=ql]):focus, button:not([class*=ql]):active {
   background: #FEF6C9;
   color: #5B3C36;
   border: 1px solid #5B3C36;
@@ -245,7 +246,7 @@ body {
 html.darkmode > body {
   background: #1E201E;
 }
-html.darkmode > body p:not(.ignoredarkmode), html.darkmode > body h1:not(.ignoredarkmode), html.darkmode > body h2:not(.ignoredarkmode), html.darkmode > body h3:not(.ignoredarkmode), html.darkmode > body h4:not(.ignoredarkmode), html.darkmode > body h5:not(.ignoredarkmode), html.darkmode > body h6:not(.ignoredarkmode), html.darkmode > body li:not(.ignoredarkmode), html.darkmode > body label:not(.ignoredarkmode) {
+html.darkmode > body span:not(.ignoredarkmode), html.darkmode > body p:not(.ignoredarkmode), html.darkmode > body h1:not(.ignoredarkmode), html.darkmode > body h2:not(.ignoredarkmode), html.darkmode > body h3:not(.ignoredarkmode), html.darkmode > body h4:not(.ignoredarkmode), html.darkmode > body h5:not(.ignoredarkmode), html.darkmode > body h6:not(.ignoredarkmode), html.darkmode > body li:not(.ignoredarkmode), html.darkmode > body label:not(.ignoredarkmode) {
   color: #FEF6C9;
 }
 html.darkmode > body .title {
@@ -266,11 +267,11 @@ html.darkmode > body a:not(.ignoredarkmode):not(.nohoveranim)::after {
 html.darkmode > body a:not(.ignoredarkmode):not(.nohoveranim).noaccentcolor::after {
   background: #FEF6C9;
 }
-html.darkmode > body button:not(.ignoredarkmode) {
+html.darkmode > body button:not([class*=ql], .ignoredarkmode) {
   background: #AC7469;
   color: #1E201E;
 }
-html.darkmode > body button:hover:not(.ignoredarkmode), html.darkmode > body button:focus:not(.ignoredarkmode), html.darkmode > body button:active:not(.ignoredarkmode) {
+html.darkmode > body button:not([class*=ql], .ignoredarkmode):hover, html.darkmode > body button:not([class*=ql], .ignoredarkmode):focus, html.darkmode > body button:not([class*=ql], .ignoredarkmode):active {
   color: #AC7469;
   background: transparent;
   border-color: #AC7469;
@@ -295,6 +296,10 @@ html.darkmode > body textarea:not(.ignoredarkmode):active, html.darkmode > body 
 html.darkmode > body li::marker:not(.ignoredarkmode) {
   color: #AC7469;
 }
+html.darkmode > body header.editor {
+  background: rgb(42.3387096774, 45.1612903226, 42.3387096774) !important;
+  box-shadow: 1px 1px 1px 1px rgb(17.6612903226, 18.8387096774, 17.6612903226) !important;
+}
 
 html.darkmode ::-webkit-scrollbar-thumb {
   background: #AC7469;
@@ -302,6 +307,15 @@ html.darkmode ::-webkit-scrollbar-thumb {
 
 main {
   min-height: 100vh;
+}
+
+header {
+  transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+}
+
+header.editor {
+  background: rgb(253.5363636364, 241.8272727273, 175.9636363636);
+  box-shadow: 1px 1px 1px 1px rgb(252.6090909091, 233.4818181818, 125.8909090909);
 }
 
 ::-moz-selection {
@@ -341,16 +355,6 @@ html.is-changing .transition-fade {
 
 html.is-animating .transition-fade {
   opacity: 0;
-}
-
-.ql-snow.ql-toolbar button {
-  border: none !important;
-}
-
-pre {
-  padding-left: 0.5em;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
 }
 
 #site-content {

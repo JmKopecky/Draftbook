@@ -100,13 +100,8 @@ public class Chapter implements Comparable<Chapter> {
 
 
     public boolean delete(ChapterRepository chapterRepository) {
-        File backupFile = new File(path + "chapter_" + id + ".json");
-        File htmlFile = new File(path + "chapter_" + id + ".txt");
-        File noteFile = new File(path + "note_" + id + ".txt");
         try {
-            backupFile.delete();
-            htmlFile.delete();
-            noteFile.delete();
+            Util.recursiveDeleteFiles(path);
             chapterRepository.delete(this);
         } catch (Exception e) {
             Log.create(e.getMessage(), "Chapter.delete()", "error", e);

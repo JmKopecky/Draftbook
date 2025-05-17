@@ -19,7 +19,9 @@ header {
     border: none !important;
     padding: 0;
     background: transparent !important;
-    font-size: 2em;
+    i {
+      font-size: 1.75em;
+    }
   }
   nav {
     display: flex;

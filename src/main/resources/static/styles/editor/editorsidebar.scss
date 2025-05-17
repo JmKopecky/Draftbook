@@ -1,0 +1,175 @@
+@import '../constants';
+
+#editor-sidebar {
+  left: 0;
+  display: flex;
+  flex-flow: column;
+  align-items: start;
+  justify-content: start;
+  height: 85vh;
+  padding-top: 15vh;
+  padding-left: 1vw;
+  width: 17vw;
+  overflow-y: scroll;
+  background: darken($primary, 5%);
+  box-shadow: 1px 1px 1px 1px darken($primary, 15%);
+  transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+  #chapter-display {
+    width: 100%;
+  }
+  .sidebar-display {
+    display: flex;
+    flex-flow: column;
+    align-items: start;
+    justify-content: start;
+    gap: 0.5em;
+    .sidebar-title-container {
+      display: flex;
+      align-items: center;
+      justify-content: start;
+      width: 99%;
+      padding-right: 1%;
+      gap: 5%;
+      .sidebar-title {
+        flex: 1;
+        overflow-x: clip;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        min-width: 0;
+      }
+      i {
+        cursor: pointer;
+      }
+      #chapter-new-popup {
+        position: absolute;
+        left: 18vw;
+        background: $accent;
+        border-radius: 1em;
+        padding: 0.5em 1em;
+        align-items: center;
+        justify-content: start;
+        gap: 0.5em;
+        z-index: 5;
+        transition: background 0.5s ease-in-out;
+        input {
+          color: $primary;
+          border-bottom-color: $primary;
+        }
+        i {
+          font-size: 1.5em;
+          color: $primary;
+          transition: color 0.5s ease-in-out;
+        }
+      }
+    }
+    .fa-ul {
+      margin-left: 0;
+      padding-left: 15%;
+      width: 85%;
+      display: flex;
+      flex-flow: column;
+      align-items: start;
+      justify-content: start;
+      gap: 0.25em;
+      li {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 0.5em;
+        justify-content: space-between;
+        span {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          i {
+            font-size: 0.75em;
+            padding-left: 0;
+            padding-right: 0;
+          }
+        }
+        .sidebar-listing {
+          font-size: 0.9em;
+          min-width: 0;
+          overflow-x: clip;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+        i.menu-icon {
+          font-size: 1em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding-left: 0.25em;
+          padding-right: 0.35em;
+          cursor: pointer;
+        }
+      }
+      li.active {
+        .sidebar-listing {
+          color: $accent;
+        }
+      }
+    }
+  }
+}
+html.darkmode #editor-sidebar .sidebar-display .sidebar-title-container #chapter-new-popup {
+  background: $accent_darkmode;
+  i {
+    color: $secondary;
+  }
+  input {
+    color: $secondary;
+    border-bottom-color: $secondary;
+  }
+}
+
+
+#editor-function-bar {
+  right: 0;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: start;
+  gap: 5vh;
+  height: 85vh;
+  padding-top: 15vh;
+  width: 4vw;
+  overflow-y: hidden;
+  background: darken($primary, 5%);
+  box-shadow: 1px 1px 1px 1px darken($primary, 15%);
+  transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+  i {
+    font-size: 2em;
+    cursor: pointer;
+    transition: opacity 0.5s ease-in-out;
+  }
+  @media (width <= 1150) {
+    width: 5vw;
+  }
+  @media (width <= 850) {
+    width: 7vw;
+  }
+  @media (width <= 550) {
+    width: 10vw;
+  }
+}
+#editor-function-bar.focusmode {
+  background-color: transparent !important;
+  position: fixed;
+  top: 0;
+  right: 0;
+  i {
+    opacity: 0.5;
+  }
+}
+
+
+html.darkmode {
+  #editor-sidebar, #editor-function-bar {
+    background: lighten($secondary, 5%);
+    box-shadow: 1px 1px 1px 1px darken($secondary, 5%) !important;
+  }
+  #editor-sidebar .sidebar-display .fa-ul li.active .sidebar-listing {
+    color: $accent_darkmode;
+  }
+}

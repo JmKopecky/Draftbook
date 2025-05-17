@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 
 @Controller
@@ -47,7 +48,18 @@ public class EditorController {
             return "error/404";
         }
 
-        model.addAttribute("chapter", chapter);
+        model.addAttribute("current_chapter", chapter);
+        try {
+            model.addAttribute("content_chapter", chapter.retrieveAsHTML());
+        } catch (IOException e) {
+            return "error";
+        }
+
+        model.addAttribute("editor", true);
+
+        //sidebar fields
+        model.addAttribute("sidebar_chapters", chapterRepository.findByWork_Id(chapter.getWork().getId()));
+
         return "editor";
     }
 }

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Header</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+<aside id="editor-function-bar" th:fragment="editor-function-bar">
+    <script src="/scripts/editorsidebar.js"></script>
+    <i class="fa-solid fa-floppy-disk" onclick="save()"></i>
+    <i class="fa-solid fa-expand" onclick="toggleFocusMode()"></i>
+    <i id="return-to-work-button" class="fa-solid fa-clipboard-list" th:data-work="${current_chapter.getWork().getId()}" onclick="returnToWork()"></i>
+</aside>
+</body>
+</html>

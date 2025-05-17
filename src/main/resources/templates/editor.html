@@ -5,13 +5,22 @@
     <title>Draftbook</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-    <link rel="stylesheet" href="/styles/about.css">
+    <link rel="stylesheet" href="/styles/editor/quill_theme.css">
+    <link rel="stylesheet" href="/styles/editor/editor.css">
+    <link rel="stylesheet" href="/styles/editor/editorsidebar.css">
     <link rel="stylesheet" href="/styles/header.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+
+    <script data-swup-reload-script src="/scripts/editor.js"></script>
 
     <script src="https://unpkg.com/swup@4"></script>
     <script src="https://unpkg.com/@swup/head-plugin@2"></script>
     <script src="https://unpkg.com/@swup/scripts-plugin@2"></script>
     <script data-swup-reload-script src="https://kit.fontawesome.com/2b6129ab2e.js" crossorigin="anonymous"></script>
+    <script data-swup-reload-script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script data-swup-reload-script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script data-swup-reload-script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <script src="/scripts/swuphooks.js"></script>
 </head>
 <body>
@@ -19,11 +28,17 @@
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main id="swup" class="page-content transition-fade">
-    <!-- Hero tagline idea: Got a story idea? let me help. -->
-    <!-- Don't hide the fact that this is a solo dev project -->
 
     <div id="site-content">
+        <!--
+        Needed here: Editor panel for the chapter.
+        Side nav (the same as on the note editor page)
+        -->
+        <aside th:replace="~{fragments/editorsidebar :: editor-sidebar}"></aside>
+        <div id="editor-container" th:utext="${content_chapter}">
 
+        </div>
+        <aside th:replace="~{fragments/editorfunctionbar :: editor-function-bar}"></aside>
     </div>
 </main>
 

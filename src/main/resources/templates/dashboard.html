@@ -83,7 +83,7 @@
             </div>
             <!-- Works -->
             <div id="work-list-container" class="content-tile" data-section="works" th:style="${section.equals('works') ? 'display: flex;' : 'display: none;'}">
-                <div class="work-display-tile content-tile" th:each="work:${works}" th:data-work="${work.getId()}">
+                <div class="work-display-tile content-tile" th:each="work:${works}" th:data-work="${work.getId()}" data-section="works">
                     <form onsubmit="renameWork(this); return false;"><input class="work-title" th:value="${work.getTitle()}" readonly></form>
                     <i class="fa-solid fa-i-cursor" onclick="renameWork(this)"></i>
                     <i class="fa-solid fa-trash" onclick="deleteWork(this)"></i>

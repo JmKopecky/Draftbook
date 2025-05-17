@@ -27,7 +27,7 @@ span, p {
   font-weight: 400;
   font-style: normal;
   color: $secondary;
-  font-size: 1.07em;
+  font-size: 16px;
   transition: color 0.5s ease-in-out;
 }
 a {
@@ -72,6 +72,7 @@ strong {
 em {
   font-family: "Nunito", sans-serif;
   font-optical-sizing: auto;
+  font-style: italic;
 }
 
 //header text styling
@@ -144,7 +145,7 @@ h6 {
 
 
 //button styling (and anims)
-button {
+button:not([class*="ql"]) {
   border: 1px solid transparent;
   background: $accent;
   border-radius: 0.25em;
@@ -158,7 +159,7 @@ button {
   transition: background 0.5s ease-in-out, color 0.5s ease-in-out, border 0.5s ease-in-out;
   cursor: pointer;
 }
-button:hover, button:focus, button:active {
+button:not([class*="ql"]):hover, button:not([class*="ql"]):focus, button:not([class*="ql"]):active {
   background: $primary;
   color: $accent;
   border: 1px solid $accent;
@@ -243,7 +244,7 @@ body {
 }
 html.darkmode > body {
   background: $secondary;
-  p:not(.ignoredarkmode), h1:not(.ignoredarkmode), h2:not(.ignoredarkmode), h3:not(.ignoredarkmode), h4:not(.ignoredarkmode), h5:not(.ignoredarkmode), h6:not(.ignoredarkmode), li:not(.ignoredarkmode), label:not(.ignoredarkmode) {
+  span:not(.ignoredarkmode), p:not(.ignoredarkmode), h1:not(.ignoredarkmode), h2:not(.ignoredarkmode), h3:not(.ignoredarkmode), h4:not(.ignoredarkmode), h5:not(.ignoredarkmode), h6:not(.ignoredarkmode), li:not(.ignoredarkmode), label:not(.ignoredarkmode) {
     color: $primary;
   }
   .title {
@@ -264,11 +265,11 @@ html.darkmode > body {
   a:not(.ignoredarkmode):not(.nohoveranim).noaccentcolor::after {
     background: $primary;
   }
-  button:not(.ignoredarkmode) {
+  button:not([class*="ql"], .ignoredarkmode) {
     background: $accent_darkmode;
     color: $secondary;
   }
-  button:hover:not(.ignoredarkmode), button:focus:not(.ignoredarkmode), button:active:not(.ignoredarkmode) {
+  button:not([class*="ql"], .ignoredarkmode):hover, button:not([class*="ql"], .ignoredarkmode):focus, button:not([class*="ql"], .ignoredarkmode):active {
     color: $accent_darkmode;
     background: transparent;
     border-color: $accent_darkmode;
@@ -293,6 +294,10 @@ html.darkmode > body {
   li::marker:not(.ignoredarkmode) {
     color: $accent_darkmode;
   }
+  header.editor {
+    background: lighten($secondary, 5%) !important;
+    box-shadow: 1px 1px 1px 1px darken($secondary, 5%) !important;
+  }
 }
 html.darkmode {
   ::-webkit-scrollbar-thumb {
@@ -301,6 +306,13 @@ html.darkmode {
 }
 main {
   min-height: 100vh;
+}
+header {
+  transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+}
+header.editor {
+  background: darken($primary, 5%);
+  box-shadow: 1px 1px 1px 1px darken($primary, 15%);
 }
 
 
@@ -341,18 +353,4 @@ html.is-changing .transition-fade {
 }
 html.is-animating .transition-fade {
   opacity: 0;
-}
-
-
-//quill global configs
-.ql-snow.ql-toolbar button {
-  border: none !important;
-}
-
-
-//hljs
-pre {
-  padding-left: 0.5em;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
 }

@@ -70,15 +70,36 @@ function toggleFocusMode() {
 
 
 
+if (activeTooltip === undefined) {
+    var activeTooltip = null;
+}
+
+window.addEventListener("click", function(e) {
+    if (activeTooltip === null || e.target.classList.contains("tooltip-button")) return;
+    if (!activeTooltip.contains(e.target)) { //close the tooltip
+        closeTooltip(activeTooltip);
+    }
+});
+
+
+function closeTooltip(elem) {
+    elem.style.display = "none";
+    for (const inputElem of elem.getElementsByTagName("input")) {
+        inputElem.value = "";
+    }
+}
+
+
+
 function openNewChapterPopup() {
     let popup = document.getElementById("chapter-new-popup");
     if (popup.style.display === "none") {
         popup.style.display = "flex";
+        activeTooltip = popup;
     } else {
-        popup.style.display = "none";
-        popup.value = "";
+        activeTooltip = null;
+        closeTooltip(popup);
     }
-    //todo handle clicking out of the popup to cancel
 }
 
 

@@ -57,6 +57,7 @@ function createTextEditor() {
             placeholder: 'Begin your story here...',
             bounds: editor
         });
+        editor.getElementsByClassName("ql-editor")[0].style.opacity = 1;
     }
     /* stuff to handle hljs on non-quill-editor pages.
     let runHljs = () => {

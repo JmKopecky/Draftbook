@@ -55,6 +55,10 @@
           color: $primary;
           border-bottom-color: $primary;
         }
+        input::placeholder {
+          color: $primary;
+          transition: color 0.5s ease-in-out;
+        }
         i {
           font-size: 1.5em;
           color: $primary;
@@ -120,6 +124,9 @@ html.darkmode #editor-sidebar .sidebar-display .sidebar-title-container #chapter
   input {
     color: $secondary;
     border-bottom-color: $secondary;
+  }
+  input::placeholder {
+    color: $secondary;
   }
 }
 

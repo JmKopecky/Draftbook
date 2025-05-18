@@ -160,7 +160,7 @@ button:not([class*="ql"]) {
   cursor: pointer;
 }
 button:not([class*="ql"]):hover, button:not([class*="ql"]):focus, button:not([class*="ql"]):active {
-  background: $primary;
+  background: transparent;
   color: $accent;
   border: 1px solid $accent;
 }

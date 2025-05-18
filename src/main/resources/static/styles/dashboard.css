@@ -159,7 +159,7 @@ button:not([class*=ql]) {
 }
 
 button:not([class*=ql]):hover, button:not([class*=ql]):focus, button:not([class*=ql]):active {
-  background: #FEF6C9;
+  background: transparent;
   color: #5B3C36;
   border: 1px solid #5B3C36;
 }

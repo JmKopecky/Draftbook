@@ -11,9 +11,9 @@
     <div id="chapter-display" class="sidebar-display">
         <div class="sidebar-title-container">
             <h6 class="sidebar-title">Chapters</h6>
-            <i class="fa-solid fa-circle-plus" onclick="openNewChapterPopup()"></i>
+            <i class="fa-solid fa-circle-plus tooltip-button" onclick="openNewChapterPopup()"></i>
             <form id="chapter-new-popup" style="display: none;" onsubmit="editorCreateChapter(); return false;">
-                <input id="chapter-new-name-input" type="text">
+                <input id="chapter-new-name-input" type="text" placeholder="New chapter name">
                 <i id="chapter-new-name-confirm" class="fa-solid fa-circle-check" onclick="editorCreateChapter()"></i>
             </form>
         </div>
@@ -21,7 +21,7 @@
             <li class="chapter-listing-li" th:each="chapter:${sidebar_chapters}" th:data-chapter="${chapter.getId()}" th:classappend="${current_chapter.getId() == chapter.getId() ? 'active' : ''}">
                 <span class="fa-li"><i class="fa-solid fa-minus"></i></span>
                 <a class="sidebar-listing chapter-listing noaccentcolor" th:text="${chapter.getTitle()}" th:href="${'/chapter/' + chapter.getId()}"></a>
-                <i class="fa-solid fa-ellipsis-vertical menu-icon"></i>
+                <i class="fa-solid fa-ellipsis-vertical menu-icon tooltip-button" onclick="openChapterMenu()"></i>
             </li>
         </ul>
     </div>

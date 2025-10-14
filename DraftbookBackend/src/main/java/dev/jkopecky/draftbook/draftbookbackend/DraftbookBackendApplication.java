@@ -1,13 +1,13 @@
-package dev.jkopecky.draftbook.draftbook;
+package dev.jkopecky.draftbook.draftbookbackend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DraftbookApplication {
+public class DraftbookBackendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DraftbookApplication.class, args);
+        SpringApplication.run(DraftbookBackendApplication.class, args);
     }
 
 }

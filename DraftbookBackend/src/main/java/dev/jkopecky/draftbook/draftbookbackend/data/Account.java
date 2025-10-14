@@ -1,6 +1,5 @@
-package dev.jkopecky.draftbook.draftbook.data;
+package dev.jkopecky.draftbook.draftbookbackend.data;
 
-import dev.jkopecky.draftbook.draftbook.exceptions.NonexistentAccountException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

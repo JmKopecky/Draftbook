@@ -1,8 +1,6 @@
-package dev.jkopecky.draftbook.draftbook.data;
+package dev.jkopecky.draftbook.draftbookbackend.data;
 
 import jakarta.persistence.*;
-
-import java.util.List;
 
 @Entity
 public class Chapter implements Comparable<Chapter> {

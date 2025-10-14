@@ -1,4 +1,4 @@
-package dev.jkopecky.draftbook.draftbook.exceptions;
+package dev.jkopecky.draftbook.draftbookbackend.exceptions;
 
 public class NonexistentAccountException extends Exception {
 }

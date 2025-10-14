@@ -1,4 +1,4 @@
-package dev.jkopecky.draftbook.draftbook.data;
+package dev.jkopecky.draftbook.draftbookbackend.data;
 
 import org.springframework.data.repository.CrudRepository;
 

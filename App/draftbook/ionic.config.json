@@ -1,0 +1,7 @@
+{
+  "name": "Draftbook",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}

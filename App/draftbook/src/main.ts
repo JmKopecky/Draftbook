@@ -1,10 +1,9 @@
-import { createApp } from 'vue'
+import {createApp} from 'vue'
 import App from './App.vue'
 import router from './router';
-import { createAuth0 } from '@auth0/auth0-vue';
 import auth0 from "@/Auth0";
 
-import { IonicVue } from '@ionic/vue';
+import {IonicVue} from '@ionic/vue';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -28,7 +27,6 @@ import '@ionic/vue/css/display.css';
  * For more info, please see:
  * https://ionicframework.com/docs/theming/dark-mode
  */
-
 /* @import '@ionic/vue/css/palettes/dark.always.css'; */
 /* @import '@ionic/vue/css/palettes/dark.class.css'; */
 import '@ionic/vue/css/palettes/dark.system.css';

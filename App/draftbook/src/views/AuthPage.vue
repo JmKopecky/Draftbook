@@ -1,7 +1,6 @@
 <script setup lang="ts">
 
-import {IonContent, IonHeader, IonPage, IonTitle, IonToolbar} from "@ionic/vue";
-import ExploreContainer from "@/components/ExploreContainer.vue";
+import {IonContent, IonPage} from "@ionic/vue";
 import LoginButton from "@/components/LoginButton.vue";
 </script>
 

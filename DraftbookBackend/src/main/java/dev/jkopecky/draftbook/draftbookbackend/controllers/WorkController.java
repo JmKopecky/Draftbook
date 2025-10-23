@@ -9,11 +9,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +39,7 @@ public class WorkController {
      * @return A response entity containing a list of works.
      */
     @GetMapping("/list")
-    public ResponseEntity<List<Work>> getWorkList(@AuthenticationPrincipal OidcUser user) {
+    public ResponseEntity<List<Work>> getWorkList(@AuthenticationPrincipal Jwt user) {
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
 
         //get all works for that account
@@ -59,7 +57,7 @@ public class WorkController {
      */
     @GetMapping("/get")
     public ResponseEntity<Work> getWork(
-            @AuthenticationPrincipal OidcUser user, @RequestBody String body) {
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
 
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
 
@@ -80,7 +78,7 @@ public class WorkController {
      */
     @PostMapping("/create")
     public ResponseEntity<Work> createWork(
-            @AuthenticationPrincipal OidcUser user, @RequestBody String body) {
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
 
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
 
@@ -109,7 +107,7 @@ public class WorkController {
      */
     @PostMapping("/delete")
     public HttpStatusCode deleteWork(
-            @AuthenticationPrincipal OidcUser user, @RequestBody String body) {
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
 
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
 

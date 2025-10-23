@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,7 +46,7 @@ public class ChapterController {
      */
     @GetMapping("/list")
     public ResponseEntity<List<Chapter>> listChapters(
-            @AuthenticationPrincipal OidcUser user, @RequestBody String body) {
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
 
         //get the target work
@@ -66,7 +67,7 @@ public class ChapterController {
      */
     @GetMapping("/get")
     public ResponseEntity<Chapter> getChapter(
-            @AuthenticationPrincipal OidcUser user, @RequestBody String body) {
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
 
         //get the target chapter
@@ -87,7 +88,7 @@ public class ChapterController {
      */
     @PostMapping("/create")
     public ResponseEntity<Chapter> createChapter(
-            @AuthenticationPrincipal OidcUser user, @RequestBody String body) {
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
 
         //get the target work
@@ -125,7 +126,7 @@ public class ChapterController {
      */
     @PostMapping("/delete")
     public HttpStatusCode deleteChapter(
-            @AuthenticationPrincipal OidcUser user, @RequestBody String body) {
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
 
         //get the target chapter

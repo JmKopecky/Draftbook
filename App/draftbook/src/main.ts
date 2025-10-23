@@ -1,7 +1,7 @@
 import {createApp} from 'vue'
 import App from './App.vue'
 import router from './router';
-import auth0 from "@/Auth0";
+import {auth0} from "@/localConfig";
 
 import {IonicVue} from '@ionic/vue';
 
@@ -29,7 +29,7 @@ import '@ionic/vue/css/display.css';
  */
 /* @import '@ionic/vue/css/palettes/dark.always.css'; */
 /* @import '@ionic/vue/css/palettes/dark.class.css'; */
-import '@ionic/vue/css/palettes/dark.system.css';
+/* import '@ionic/vue/css/palettes/dark.system.css'; */
 
 /* Theme variables */
 import './theme/variables.css';

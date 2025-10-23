@@ -1,6 +1,6 @@
-import {createAuth0} from '@auth0/auth0-vue';
+import {createAuth0} from "@auth0/auth0-vue";
 
-const auth0 = createAuth0({
+export const auth0 = createAuth0({
     domain: "dev-jkopecky.us.auth0.com",
     clientId: "YVDjNf0dYIl8V3VaNyZiyJ0I0HwOe6mx",
     authorizationParams: {
@@ -9,4 +9,5 @@ const auth0 = createAuth0({
     }
 });
 
-export default auth0;
+// export const API_URL = "https://draftbook.jkopecky.dev/api";
+export const API_URL = "http://localhost:443/api";

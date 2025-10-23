@@ -40,9 +40,7 @@ public class Chapter implements Comparable<Chapter> {
         work.insertChapter(this, workRepository, chapterRepository);
     }
 
-    public Chapter() {
-        throw new UnsupportedOperationException("Cannot create a chapter without a work.");
-    }
+    public Chapter() {}
 
     /**
      * Delete this chapter.

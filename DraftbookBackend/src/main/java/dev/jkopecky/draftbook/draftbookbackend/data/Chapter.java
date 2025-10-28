@@ -85,7 +85,7 @@ public class Chapter implements Comparable<Chapter> {
             JsonNode node = mapper.readTree(requestBody);
             int chapterId = node.get("chapter_id").asInt();
             chapter = chapterRepository.findById(chapterId).get();
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException | NullPointerException e) {
             result[1] = HttpStatus.BAD_REQUEST;
             return result;
         } catch (NoSuchElementException e) {

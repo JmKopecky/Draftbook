@@ -106,7 +106,7 @@ public class ChapterController {
             JsonNode node = mapper.readTree(body);
             chapterName = node.get("chapter_name").asText();
             chapterNumber = node.get("chapter_number").asInt();
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException | NullPointerException e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);

@@ -24,6 +24,7 @@ public class Work {
     //chapter ids separated by ;
     private String chapterIds;
     private int accountId;
+    private int chapterCount;
 
     /**
      * Create a work in the database.
@@ -66,11 +67,10 @@ public class Work {
     }
 
     /**
-     * Gets the number of chapters in this work.
-     * @return The number of chapters.
+     * Updates the chapter counter variable.
      */
-    public int getChapterCount() {
-        return chapterIds.split(";").length;
+    public void updateChapterCount() {
+        this.chapterCount = chapterIds.split(";").length;
     }
 
     /**
@@ -117,7 +117,7 @@ public class Work {
             Work targetWork = workRepository.findById(workId).get();
             result[0] = targetWork;
             result[1] = HttpStatus.OK;
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException | NullPointerException e) {
             result[1] = HttpStatus.BAD_REQUEST;
             return result;
         } catch (NoSuchElementException e) {
@@ -191,6 +191,7 @@ public class Work {
 
         //save the result
         chapterIds = result;
+        updateChapterCount();
         workRepository.save(this);
     }
 
@@ -224,5 +225,8 @@ public class Work {
     }
     public void setAccountId(int accountId) {
         this.accountId = accountId;
+    }
+    public int getChapterCount() {
+        return chapterCount;
     }
 }

@@ -88,7 +88,7 @@ public class WorkController {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(body);
             workName = node.get("work_name").asText();
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException | NullPointerException e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -119,6 +119,49 @@ public class WorkController {
 
         ((Work) workContainer[0]).deleteWork(workRepository, chapterRepository, noteRepository);
         return HttpStatus.OK;
+    }
+
+    /**
+     * Update the work with a new title and subtitle.
+     * @param user The user who must own the target work.
+     * @param body The request body, containing the work title and subtitle.
+     * @return A ResponseEntity that may contain the resulting work.
+     */
+    @PostMapping("/update")
+    public ResponseEntity<Work> updateWork(
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
+
+        Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
+
+        //get the target work
+        Object[] workContainer = Work.getWorkIfAllowed(body, account, workRepository);
+        if (workContainer[0] == null) {
+            return new ResponseEntity<>((HttpStatusCode) workContainer[1]);
+        }
+        Work work = (Work) workContainer[0];
+
+        //get request data about the new work values.
+        String workTitle;
+        String workSubtitle;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(body);
+            workTitle = node.get("work_title").asText();
+            workSubtitle = node.get("work_subtitle").asText();
+        } catch (JsonProcessingException | NullPointerException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+
+        System.out.println(workTitle);
+        System.out.println(workSubtitle);
+
+        //update the work with the new data.
+        work.setTitle(workTitle);
+        work.setSubtitle(workSubtitle);
+        workRepository.save(work);
+        return new ResponseEntity<>(work, HttpStatus.OK);
     }
 
 }

@@ -4,6 +4,7 @@ import AuthPage from '../views/AuthPage.vue'
 import DashboardPage from "@/views/DashboardPage.vue";
 import {authGuard} from "@auth0/auth0-vue";
 import CallbackPage from "@/views/CallbackPage.vue";
+import EditorPage from "@/views/EditorPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -21,6 +22,11 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/dashboard',
         component: DashboardPage,
+        beforeEnter: authGuard
+    },
+    {
+        path: '/work/:id',
+        component: EditorPage,
         beforeEnter: authGuard
     }
 

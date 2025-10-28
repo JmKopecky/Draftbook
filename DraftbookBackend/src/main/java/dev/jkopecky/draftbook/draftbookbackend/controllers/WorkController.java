@@ -106,7 +106,7 @@ public class WorkController {
      * @return An HttpStatusCode representing the result of this operation.
      */
     @PostMapping("/delete")
-    public HttpStatusCode deleteWork(
+    public ResponseEntity<String> deleteWork(
             @AuthenticationPrincipal Jwt user, @RequestBody String body) {
 
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
@@ -114,11 +114,11 @@ public class WorkController {
         //get the target work
         Object[] workContainer = Work.getWorkIfAllowed(body, account, workRepository);
         if (workContainer[0] == null) {
-            return (HttpStatusCode) workContainer[1];
+            return new ResponseEntity<>("Failed to retrieve work", (HttpStatusCode) workContainer[1]);
         }
 
         ((Work) workContainer[0]).deleteWork(workRepository, chapterRepository, noteRepository);
-        return HttpStatus.OK;
+        return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
     /**

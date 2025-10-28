@@ -161,6 +161,10 @@ public class Work {
      */
     public ArrayList<Chapter> getChapters(ChapterRepository chapterRepository) {
         ArrayList<Chapter> chapters = new ArrayList<>();
+
+        //test for empty chapters before splitting
+        if (chapterIds.isEmpty()) return chapters;
+
         //chapter ids are split by ';'
         for (String chapterId : chapterIds.split(";")) {
             int idAsInt = Integer.parseInt(chapterId);

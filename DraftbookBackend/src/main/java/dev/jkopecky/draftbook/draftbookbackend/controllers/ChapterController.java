@@ -125,19 +125,19 @@ public class ChapterController {
      * @return An HttpStatusCode indicating the result.
      */
     @PostMapping("/delete")
-    public HttpStatusCode deleteChapter(
+    public ResponseEntity<String> deleteChapter(
             @AuthenticationPrincipal Jwt user, @RequestBody String body) {
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
 
         //get the target chapter
         Object[] chapterContainer = Chapter.getChapterIfAllowed(body, account, workRepository, chapterRepository);
         if (chapterContainer[0] == null) {
-            return (HttpStatusCode) chapterContainer[1];
+            return new ResponseEntity<>("Failed.", (HttpStatusCode) chapterContainer[1]);
         }
         Chapter chapter = (Chapter) chapterContainer[0];
 
         chapter.deleteChapter(chapterRepository, noteRepository);
 
-        return HttpStatus.OK;
+        return new ResponseEntity<>("Success.", HttpStatus.OK);
     }
 }

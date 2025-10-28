@@ -136,7 +136,11 @@ onIonViewWillEnter(reloadWorks);
     <ion-content>
 
       <div id="works-tile-container" v-if="worksExist">
-        <WorkTile v-for="work in works" :work="work" @manage-work="openWorkManager" @do-toast="presentToast"></WorkTile>
+        <WorkTile v-for="work in works" :work="work"
+                  @manage-work="openWorkManager"
+                  @do-toast="presentToast"
+                  @refresh="reloadWorks">
+        </WorkTile>
       </div>
 
       <ion-fab slot="fixed" vertical="bottom" horizontal="end">

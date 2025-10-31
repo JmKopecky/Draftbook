@@ -11,7 +11,7 @@ addIcons({pencil, trash});
 const {getAccessTokenSilently} = useAuth0();
 
 //emits
-const emit = defineEmits(['doToast', 'refresh']);
+const emit = defineEmits(['doToast', 'refresh', 'manageWork']);
 
 //props
 const props = defineProps(['work']);

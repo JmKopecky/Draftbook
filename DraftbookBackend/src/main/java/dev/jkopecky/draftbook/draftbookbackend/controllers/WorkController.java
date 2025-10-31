@@ -55,7 +55,7 @@ public class WorkController {
      * @param body The request body, containing one element "workid" that must be an integer corresponding to the id of a work.
      * @return A ResponseEntity that may contain the target work.
      */
-    @GetMapping("/get")
+    @PostMapping("/get")
     public ResponseEntity<Work> getWork(
             @AuthenticationPrincipal Jwt user, @RequestBody String body) {
 

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -44,7 +45,7 @@ public class ChapterController {
      * @param body The request body, containing a work id.
      * @return A list of chapters for the work.
      */
-    @GetMapping("/list")
+    @PostMapping("/list")
     public ResponseEntity<List<Chapter>> listChapters(
             @AuthenticationPrincipal Jwt user, @RequestBody String body) {
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
@@ -60,12 +61,38 @@ public class ChapterController {
     }
 
     /**
+     * Returns a list of chapter identifiers for the given work.
+     * @param user The user who must own the work.
+     * @param body The request body, containing a work id.
+     * @return A sorted list of chapter identifiers containing chapter title, id, and number.
+     */
+    @PostMapping("/list/identifiers")
+    public ResponseEntity<List<ChapterIdentifier>> listTruncatedChapters(
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
+        Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
+
+        //get the target work
+        Object[] workContainer = Work.getWorkIfAllowed(body, account, workRepository);
+        if (workContainer[0] == null) {
+            return new ResponseEntity<>(null, (HttpStatusCode) workContainer[1]);
+        }
+        Work work = (Work) workContainer[0];
+
+        //get a list of chapter identifiers
+        ArrayList<Chapter> chapters = work.getChapters(chapterRepository);
+        List<ChapterIdentifier> chapterIdentifiers = chapters.stream()
+                .map(ChapterIdentifier::new).sorted().toList();
+
+        return new ResponseEntity<>(chapterIdentifiers, HttpStatus.OK);
+    }
+
+    /**
      * Get a specific chapter.
      * @param user The user who must own the work for this chapter.
      * @param body The request body, containing a work and chapter id.
      * @return An object representing the chapter.
      */
-    @GetMapping("/get")
+    @PostMapping("/get")
     public ResponseEntity<Chapter> getChapter(
             @AuthenticationPrincipal Jwt user, @RequestBody String body) {
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);

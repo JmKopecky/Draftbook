@@ -11,6 +11,14 @@ public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int Id;
+    private String descriptor;
+
+    public Note() {}
+
+    public Note(String descriptor, NoteRepository noteRepository) {
+        this.descriptor = descriptor;
+        noteRepository.save(this);
+    }
 
     /**
      * Deletes this note.
@@ -25,5 +33,13 @@ public class Note {
     }
     public void setId(int id) {
         Id = id;
+    }
+
+    public String getDescriptor() {
+        return descriptor;
+    }
+
+    public void setDescriptor(String content) {
+        this.descriptor = content;
     }
 }

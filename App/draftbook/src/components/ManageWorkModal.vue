@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import {modalController} from "@ionic/vue";
+import {IonIcon, modalController, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonItem, IonInput} from "@ionic/vue";
 import {ref} from "vue";
-import {IonIcon} from "@ionic/vue";
 import {closeCircle} from "ionicons/icons";
 import {addIcons} from "ionicons";
 import {useAuth0} from "@auth0/auth0-vue";
 import {API_URL} from "@/localConfig";
+
 addIcons({closeCircle});
 
 //auth

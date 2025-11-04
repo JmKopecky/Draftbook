@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {IonIcon} from "@ionic/vue";
+import {IonIcon, IonButton} from "@ionic/vue";
 import {addIcons} from 'ionicons';
 import {person} from 'ionicons/icons';
 

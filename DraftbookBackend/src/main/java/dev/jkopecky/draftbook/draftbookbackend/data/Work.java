@@ -9,9 +9,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Entity
 public class Work {
@@ -147,7 +149,7 @@ public class Work {
 
         //get all chapters and delete them first
         for (Chapter chapter : getChapters(chapterRepository)) {
-            chapter.deleteChapter(chapterRepository, noteRepository);
+            chapter.deleteChapter(chapterRepository, noteRepository, workRepository);
         }
 
         //delete this work
@@ -197,6 +199,21 @@ public class Work {
         chapterIds = result;
         updateChapterCount();
         workRepository.save(this);
+    }
+
+    /**
+     * On the deletion of a chapter, make sure the work's list of chapters is up to date.
+     * @param chapter The chapter being deleted.
+     * @param workRepository The table where works are stored.
+     * @param chapterRepository The table where chapters are stored.
+     */
+    public void updateChapterListOnDelete(Chapter chapter, WorkRepository workRepository, ChapterRepository chapterRepository) {
+        ArrayList<Chapter> oldChapterList = getChapters(chapterRepository);
+        ArrayList<Chapter> newChapterList = new ArrayList<>(
+                oldChapterList.stream().filter((chapterToCheck)
+                        -> chapterToCheck.getId() != chapter.getId())
+                        .sorted().toList());
+        storeChapterIds(newChapterList, workRepository);
     }
 
     //getters and setters

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {IonIcon, IonPage, IonAlert, toastController, onIonViewWillEnter, modalController} from "@ionic/vue";
+import {IonAlert, IonIcon, IonPage, modalController, onIonViewWillEnter, toastController, IonHeader, IonToolbar, IonTitle, IonButtons, IonFab, IonFabButton, IonContent} from "@ionic/vue";
 import {useAuth0} from '@auth0/auth0-vue';
 import AccountButton from "@/components/AccountButton.vue";
 import {API_URL} from "@/localConfig";
@@ -8,6 +8,8 @@ import WorkTile from "@/components/WorkTile.vue";
 import {addIcons} from 'ionicons';
 import {add} from 'ionicons/icons';
 import ManageWorkModal from "@/components/ManageWorkModal.vue";
+import {presentToast} from "@/UtilFunctions";
+
 addIcons({add});
 
 //alert buttons and inputs
@@ -45,20 +47,6 @@ const worksExist = computed(() => {
 });
 
 /**
- * Present a toast notification to the user
- * @param message The message to display to the user.
- */
-const presentToast = async (message:string) => {
-  const toast = await toastController.create({
-    message: message,
-    duration: 4000,
-    position: 'bottom',
-  });
-
-  await toast.present();
-};
-
-/**
  * Retrieves a refreshed list of the works for the current user.
  */
 async function reloadWorks() {
@@ -73,8 +61,12 @@ async function reloadWorks() {
     return;
   }
   const data = await response.json();
-  if (Array.isArray(data) && data.length !== 0) {
-    works.value = data;
+  if (Array.isArray(data)) {
+    if (data.length !== 0) {
+      works.value = data;
+    } else {
+      presentToast("You currently have no works.");
+    }
   } else {
     presentToast("Failed to parse retrieved works.");
   }

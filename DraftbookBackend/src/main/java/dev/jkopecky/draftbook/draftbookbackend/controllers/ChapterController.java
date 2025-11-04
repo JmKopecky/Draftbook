@@ -8,10 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -140,7 +138,7 @@ public class ChapterController {
         }
 
         Chapter chapter = new Chapter(chapterName, chapterNumber, work,
-                chapterRepository, workRepository);
+                chapterRepository, workRepository, noteRepository);
 
         return new ResponseEntity<>(chapter, HttpStatus.CREATED);
     }
@@ -163,7 +161,35 @@ public class ChapterController {
         }
         Chapter chapter = (Chapter) chapterContainer[0];
 
-        chapter.deleteChapter(chapterRepository, noteRepository);
+        chapter.deleteChapter(chapterRepository, noteRepository, workRepository);
+
+        return new ResponseEntity<>("Success.", HttpStatus.OK);
+    }
+
+    @PostMapping("/rename")
+    public ResponseEntity<String> renameChapter(@AuthenticationPrincipal Jwt user, @RequestBody String body) {
+        Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
+
+        String newChapterName;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(body);
+            newChapterName = node.get("chapter_title").asText();
+        } catch (JsonProcessingException | NullPointerException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+
+        //get the target chapter
+        Object[] chapterContainer = Chapter.getChapterIfAllowed(body, account, workRepository, chapterRepository);
+        if (chapterContainer[0] == null) {
+            return new ResponseEntity<>("Failed.", (HttpStatusCode) chapterContainer[1]);
+        }
+        Chapter chapter = (Chapter) chapterContainer[0];
+
+        chapter.setTitle(newChapterName);
+        chapterRepository.save(chapter);
 
         return new ResponseEntity<>("Success.", HttpStatus.OK);
     }

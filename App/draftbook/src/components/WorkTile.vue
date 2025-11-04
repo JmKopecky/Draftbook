@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import {IonIcon} from "@ionic/vue";
+import {IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton} from "@ionic/vue";
 import {pencil, trash} from "ionicons/icons";
 import {addIcons} from "ionicons";
 import router from "@/router";
 import {useAuth0} from "@auth0/auth0-vue";
 import {API_URL} from "@/localConfig";
+
 addIcons({pencil, trash});
 
 //auth

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Cascade;
 import org.springframework.http.HttpStatus;
 
 import java.util.NoSuchElementException;
@@ -19,6 +20,7 @@ public class Chapter implements Comparable<Chapter> {
     private int workId;
     String content;
     @OneToOne(optional = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     Note note;
 
 
@@ -31,11 +33,11 @@ public class Chapter implements Comparable<Chapter> {
      * @param workRepository The table in the database containing works.
      */
     public Chapter(String chapterName, int chapterNumber, Work work,
-                   ChapterRepository chapterRepository, WorkRepository workRepository) {
+                   ChapterRepository chapterRepository, WorkRepository workRepository, NoteRepository noteRepository) {
         this.title = chapterName;
         this.workId = work.getId();
         this.content = "";
-        this.note = new Note();
+        this.note = new Note("Note: " + chapterName, noteRepository);
         this.number = work.boundChapterNumber(chapterNumber);
         work.insertChapter(this, workRepository, chapterRepository);
     }
@@ -47,8 +49,12 @@ public class Chapter implements Comparable<Chapter> {
      * @param chapterRepository The chapter table in the database.
      * @param noteRepository The note table in the database.
      */
-    public void deleteChapter(ChapterRepository chapterRepository, NoteRepository noteRepository) {
-        //delete the associated note first if it exists
+    public void deleteChapter(ChapterRepository chapterRepository, NoteRepository noteRepository, WorkRepository workRepository) {
+        //update the work's chapter list
+        workRepository.findById(workId).ifPresent(work
+                -> work.updateChapterListOnDelete(this, workRepository, chapterRepository));
+
+        //delete the associated note if it exists
         if (note != null) {
             note.delete(noteRepository);
         }

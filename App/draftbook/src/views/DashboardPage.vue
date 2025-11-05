@@ -1,5 +1,18 @@
 <script setup lang="ts">
-import {IonAlert, IonIcon, IonPage, modalController, onIonViewWillEnter, toastController, IonHeader, IonToolbar, IonTitle, IonButtons, IonFab, IonFabButton, IonContent} from "@ionic/vue";
+import {
+  IonAlert,
+  IonButtons,
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonHeader,
+  IonIcon,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  modalController,
+  onIonViewWillEnter
+} from "@ionic/vue";
 import {useAuth0} from '@auth0/auth0-vue';
 import AccountButton from "@/components/AccountButton.vue";
 import {API_URL} from "@/localConfig";

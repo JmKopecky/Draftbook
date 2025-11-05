@@ -1,26 +1,49 @@
 <script setup lang="ts">
 
-import {IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonMenu, IonPage, IonSplitPane, IonTitle, IonToolbar, menuController, onIonViewWillEnter, toastController, IonItem, IonLabel, IonItemOption, IonItemSliding, IonList, IonItemOptions, IonAlert, IonFabButton, IonFab} from "@ionic/vue";
+import {
+  IonAlert,
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonHeader,
+  IonIcon,
+  IonItem,
+  IonItemOption,
+  IonItemOptions,
+  IonItemSliding,
+  IonLabel,
+  IonList,
+  IonMenu,
+  IonPage,
+  IonSplitPane,
+  IonTitle,
+  IonToolbar,
+  menuController,
+  onIonViewWillEnter
+} from "@ionic/vue";
 import {useRoute} from "vue-router";
-import {ref, useTemplateRef, watch} from "vue";
+import {ref, watch} from "vue";
 import {useAuth0} from "@auth0/auth0-vue";
 import {API_URL} from "@/localConfig";
 import router from "@/router";
 import {
+  add,
   apps,
+  caretBack,
+  caretForward,
   chevronBack,
+  chevronExpand,
   chevronForward,
   menu,
-  trash,
   open,
-  caretBack,
-  chevronExpand,
   pencil,
-  add,
-  caretForward
+  trash
 } from "ionicons/icons";
 import {addIcons} from "ionicons";
 import {presentToast} from "@/UtilFunctions";
+import ChapterContentEditor from "@/components/ChapterContentEditor.vue";
 
 addIcons({menu, apps, chevronBack, chevronForward, trash, open, caretBack, chevronExpand, pencil, add, caretForward});
 
@@ -33,6 +56,7 @@ let splitPaneVisible:boolean = window.matchMedia(splitPaneBreakpoint).matches;
 let chapterSlidingRef:any = ref([]);
 let isRenameAlertOpen:any = ref(<boolean>false)
 let renameAlert = ref();
+let currentChapter = ref(-1);
 
 //alert buttons and inputs
 const finalizeChapterButtons = [{
@@ -131,7 +155,6 @@ async function reloadWork(newWorkId:string) {
     return;
   }
   work.value = await response.json();
-  console.log(work);
 }
 
 /**
@@ -151,7 +174,6 @@ async function reloadChapters() {
     return;
   }
   chapters.value = await response.json();
-  console.log(chapters);
 }
 
 /**
@@ -262,6 +284,10 @@ async function openRenameChapterMenu(id:any) {
   alertElem.setAttribute("data-chapterid", id);
 }
 
+/**
+ * Rename the chapter in the alert.
+ * @param title The new chapter title.
+ */
 async function renameChapter(title:string) {
   let chapterId = renameAlert.value.$el.getAttribute(("data-chapterid"));
   const accessToken = await getAccessTokenSilently();
@@ -282,6 +308,13 @@ async function renameChapter(title:string) {
   }
   presentToast("Chapter renamed successfully.")
   await reloadChapters();
+}
+
+async function selectChapter(id:any) {
+  currentChapter.value = id;
+  if (!splitPaneVisible) {
+    toggleMenu('chapter-menu');
+  }
 }
 
 </script>
@@ -325,7 +358,10 @@ async function renameChapter(title:string) {
           ></ion-alert>
 
           <ion-list>
-            <ion-item-sliding v-for="(chapter, index) in chapters" :key="chapter['number']" :ref="element => chapterSlidingRef[index] = element">
+            <ion-item-sliding v-for="(chapter, index) in chapters"
+                              :key="chapter['number']"
+                              :ref="element => chapterSlidingRef[index] = element"
+                              @click="selectChapter(chapter['id'])">
               <ion-item button :detail="false">
                 <ion-label>{{ chapter['title'] }}</ion-label>
                 <ion-button slot="end" shape="round" fill="clear" @click="toggleChapterOptionMenu(index)">
@@ -385,7 +421,9 @@ async function renameChapter(title:string) {
         </ion-header>
 
         <ion-content>
-          <p>Content!</p>
+          <ChapterContentEditor :chapter-id="currentChapter" :work-id="workId" @do-toast="presentToast">
+
+          </ChapterContentEditor>
         </ion-content>
       </ion-page>
     </ion-split-pane>

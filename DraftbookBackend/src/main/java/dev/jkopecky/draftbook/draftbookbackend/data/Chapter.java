@@ -147,4 +147,10 @@ public class Chapter implements Comparable<Chapter> {
     public void setNumber(int number) {
         this.number = number;
     }
+    public void setContent(String content) {
+        this.content = content;
+    }
+    public String getContent() {
+        return content;
+    }
 }

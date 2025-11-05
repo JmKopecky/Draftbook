@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {IonContent, IonPage, IonCard} from "@ionic/vue";
+import {IonCard, IonContent, IonPage} from "@ionic/vue";
 </script>
 
 <template>

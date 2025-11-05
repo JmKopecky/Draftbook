@@ -1,5 +1,16 @@
 <script setup lang="ts">
-import {IonIcon, modalController, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonItem, IonInput} from "@ionic/vue";
+import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonInput,
+  IonItem,
+  IonTitle,
+  IonToolbar,
+  modalController
+} from "@ionic/vue";
 import {ref} from "vue";
 import {closeCircle} from "ionicons/icons";
 import {addIcons} from "ionicons";

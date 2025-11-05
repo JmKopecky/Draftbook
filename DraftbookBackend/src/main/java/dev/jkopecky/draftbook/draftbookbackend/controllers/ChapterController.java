@@ -106,6 +106,26 @@ public class ChapterController {
     }
 
     /**
+     * Returns the chapter's html content.
+     * @param user The user who must own the chapter.
+     * @param body The request body, containing a work and chapter id.
+     * @return The html content of the chapter.
+     */
+    @PostMapping("/get/content")
+    public ResponseEntity<String> getChapterContent(@AuthenticationPrincipal Jwt user, @RequestBody String body) {
+        Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
+
+        //get the target chapter
+        Object[] chapterContainer = Chapter.getChapterIfAllowed(body, account, workRepository, chapterRepository);
+        if (chapterContainer[0] == null) {
+            return new ResponseEntity<>(null, (HttpStatusCode) chapterContainer[1]);
+        }
+        Chapter chapter = (Chapter) chapterContainer[0];
+
+        return new ResponseEntity<>(chapter.getContent(), HttpStatus.OK);
+    }
+
+    /**
      * Create a new chapter.
      * @param user The user owning the chapter.
      * @param body The request body, including the work_id, chapter_name, and chapter_number.
@@ -166,6 +186,12 @@ public class ChapterController {
         return new ResponseEntity<>("Success.", HttpStatus.OK);
     }
 
+    /**
+     * Renames the chapter.
+     * @param user The user who must own the chapter.
+     * @param body The body of the request, containing work_id, chapter_id, and chapter_title.
+     * @return An HttpStatusCode containing the result.
+     */
     @PostMapping("/rename")
     public ResponseEntity<String> renameChapter(@AuthenticationPrincipal Jwt user, @RequestBody String body) {
         Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
@@ -184,13 +210,47 @@ public class ChapterController {
         //get the target chapter
         Object[] chapterContainer = Chapter.getChapterIfAllowed(body, account, workRepository, chapterRepository);
         if (chapterContainer[0] == null) {
-            return new ResponseEntity<>("Failed.", (HttpStatusCode) chapterContainer[1]);
+            return new ResponseEntity<>("Failed", (HttpStatusCode) chapterContainer[1]);
         }
         Chapter chapter = (Chapter) chapterContainer[0];
 
         chapter.setTitle(newChapterName);
         chapterRepository.save(chapter);
 
-        return new ResponseEntity<>("Success.", HttpStatus.OK);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
+
+    /**
+     * Saves the full html to the chapter. Note potential performance downsides with large files.
+     * @param user The user who must own the chapter.
+     * @param body The body of the request, containing work_id, chapter_id, and chapter_content.
+     * @return An HttpStatusCode containing the result.
+     */
+    @PostMapping("/save/html")
+    public ResponseEntity<String> saveHtml(@AuthenticationPrincipal Jwt user, @RequestBody String body) {
+        Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
+
+        String chapterContent;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(body);
+            chapterContent = node.get("chapter_content").asText();
+        } catch (JsonProcessingException | NullPointerException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+
+        //get the target chapter
+        Object[] chapterContainer = Chapter.getChapterIfAllowed(body, account, workRepository, chapterRepository);
+        if (chapterContainer[0] == null) {
+            return new ResponseEntity<>("Failed.", (HttpStatusCode) chapterContainer[1]);
+        }
+        Chapter chapter = (Chapter) chapterContainer[0];
+
+        chapter.setContent(chapterContent);
+        chapterRepository.save(chapter);
+
+        return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 }

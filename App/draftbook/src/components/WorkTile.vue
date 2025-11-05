@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton} from "@ionic/vue";
+import {IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon} from "@ionic/vue";
 import {pencil, trash} from "ionicons/icons";
 import {addIcons} from "ionicons";
 import router from "@/router";

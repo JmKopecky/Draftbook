@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {IonContent, IonPage, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent} from "@ionic/vue";
+import {IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonPage} from "@ionic/vue";
 import LoginButton from "@/components/LoginButton.vue";
 </script>
 

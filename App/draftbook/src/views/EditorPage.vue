@@ -44,6 +44,7 @@ import {
 import {addIcons} from "ionicons";
 import {presentToast} from "@/UtilFunctions";
 import ChapterContentEditor from "@/components/ChapterContentEditor.vue";
+import ChapterMenuContent from "@/components/ChapterMenuContent.vue";
 
 addIcons({menu, apps, chevronBack, chevronForward, trash, open, caretBack, chevronExpand, pencil, add, caretForward});
 
@@ -53,57 +54,9 @@ let work:any = ref({title: 'Loading...'});
 let chapters:any = ref([]);
 let splitPaneBreakpoint = "(min-width: 992px)";
 let splitPaneVisible:boolean = window.matchMedia(splitPaneBreakpoint).matches;
-let chapterSlidingRef:any = ref([]);
-let isRenameAlertOpen:any = ref(<boolean>false)
-let renameAlert = ref();
 let currentChapter = ref(-1);
-
-//alert buttons and inputs
-const finalizeChapterButtons = [{
-  text: 'Create',
-  role: 'confirm',
-  handler: (alert:any) => {
-    let title = alert.chapterTitle;
-    let chapterNumber = alert.chapterNumber;
-    createChapter(title, chapterNumber);
-  },
-}];
-const createChapterInputs = [
-  {
-    name: 'chapterTitle',
-    placeholder: 'Title',
-    attributes: {
-      maxlength: 256
-    },
-  },
-  {
-    name: 'chapterNumber',
-    placeholder: 'Chapter Number',
-    attributes: {
-      maxlength: 4,
-      type: "number",
-      min: 1,
-      max: chapters.length + 1
-    },
-  }
-  ];
-const renameChapterButtons = [{
-  text: 'Rename',
-  role: 'confirm',
-  handler: (alert:any) => {
-    let title = alert.chapterTitle;
-    renameChapter(title);
-  },
-}];
-const renameChapterInputs = [
-  {
-    name: 'chapterTitle',
-    placeholder: 'New title',
-    attributes: {
-      maxlength: 256
-    },
-  }
-];
+let chapterMenu = ref();
+const chapterMenuId = "chapter-menu";
 
 //auth
 const {getAccessTokenSilently} = useAuth0();
@@ -124,8 +77,6 @@ onIonViewWillEnter(() => {
   reloadWork(workId)
   reloadChapters();
 });
-
-//the actual methods
 
 /**
  * A util function to parse the id params into one id.
@@ -211,109 +162,13 @@ async function updateOnSplitPaneChange(event:any) {
 }
 
 /**
- * Send a request to the server to create the chapter.
- * @param title The title of the chapter to create.
- * @param chapterNumber The position number of the chapter to create.
+ * Marks the current chapter when selected.
+ * @param id The chapter to select.
  */
-async function createChapter(title:string, chapterNumber:string) {
-  const accessToken = await getAccessTokenSilently();
-  const response = await fetch(API_URL + "/chapters/create", {
-    method: 'POST',
-    headers: {
-      Authorization: 'Bearer ' + accessToken
-    },
-    body: JSON.stringify({
-      chapter_name: title,
-      chapter_number: chapterNumber,
-      work_id: workId
-    })
-  });
-  if (!response.ok) {
-    presentToast("Failed to create chapter.");
-    return;
-  }
-  presentToast("Chapter created successfully.")
-  await reloadChapters();
-}
-
-/**
- * Tells the server to delete the target chapter.
- * @param chapterId The chapter to delete.
- */
-async function deleteChapter(chapterId:string) {
-  const accessToken = await getAccessTokenSilently();
-  const response = await fetch(API_URL + "/chapters/delete", {
-    method: 'POST',
-    headers: {
-      Authorization: 'Bearer ' + accessToken
-    },
-    body: JSON.stringify({
-      chapter_id: chapterId,
-      work_id: workId
-    })
-  });
-  if (!response.ok) {
-    presentToast("Failed to delete chapter.");
-    return;
-  }
-  presentToast("Chapter deleted successfully.")
-  await reloadChapters();
-}
-
-/**
- * Toggle the chapter option menu.
- * @param index The index of the menu to toggle.
- */
-async function toggleChapterOptionMenu(index:any) {
-  let slider = chapterSlidingRef.value[index].$el;
-  let openDistance = await slider.getSlidingRatio();
-  if (openDistance != 0) {
-    slider.close();
-  } else {
-    slider.open(undefined);
-  }
-}
-
-/**
- * Open the alert menu for renaming a chapter.
- * @param id The id of the chapter to rename.
- */
-async function openRenameChapterMenu(id:any) {
-  isRenameAlertOpen.value = true;
-  let alertElem = renameAlert.value.$el;
-  alertElem.setAttribute("data-chapterid", id);
-}
-
-/**
- * Rename the chapter in the alert.
- * @param title The new chapter title.
- */
-async function renameChapter(title:string) {
-  let chapterId = renameAlert.value.$el.getAttribute(("data-chapterid"));
-  const accessToken = await getAccessTokenSilently();
-  const response = await fetch(API_URL + "/chapters/rename", {
-    method: 'POST',
-    headers: {
-      Authorization: 'Bearer ' + accessToken
-    },
-    body: JSON.stringify({
-      chapter_id: chapterId,
-      work_id: workId,
-      chapter_title: title
-    })
-  });
-  if (!response.ok) {
-    presentToast("Failed to rename chapter.");
-    return;
-  }
-  presentToast("Chapter renamed successfully.")
-  await reloadChapters();
-}
-
 async function selectChapter(id:any) {
   currentChapter.value = id;
   if (!splitPaneVisible) {
-    toggleMenu('chapter-menu');
+    toggleMenu(chapterMenuId);
   }
 }
 
@@ -324,67 +179,11 @@ async function selectChapter(id:any) {
     <ion-split-pane :when="splitPaneBreakpoint" content-id="main" @ionSplitPaneVisible="updateOnSplitPaneChange">
 
       <ion-menu menu-id="chapter-menu" content-id="main" type="overlay">
-        <ion-header>
-          <ion-toolbar>
-            <ion-title>Chapters</ion-title>
-            <ion-buttons slot="end">
-              <ion-button fill="clear" @click="toggleMenu('chapter-menu')">
-                <ion-icon name="chevron-back" size="large"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
-        <ion-content class="ion-padding">
-
-          <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-            <ion-fab-button id="create-chapter-button">
-              <ion-icon :icon="add"></ion-icon>
-            </ion-fab-button>
-          </ion-fab>
-
-          <ion-alert
-              trigger="create-chapter-button"
-              header="Create New Chapter"
-              :buttons="finalizeChapterButtons"
-              :inputs="createChapterInputs"
-          ></ion-alert>
-
-          <ion-alert
-              ref="renameAlert"
-              :isOpen="isRenameAlertOpen"
-              header="Rename Chapter"
-              :buttons="renameChapterButtons"
-              :inputs="renameChapterInputs"
-          ></ion-alert>
-
-          <ion-list>
-            <ion-item-sliding v-for="(chapter, index) in chapters"
-                              :key="chapter['number']"
-                              :ref="element => chapterSlidingRef[index] = element"
-                              @click="selectChapter(chapter['id'])">
-              <ion-item button :detail="false">
-                <ion-label>{{ chapter['title'] }}</ion-label>
-                <ion-button slot="end" shape="round" fill="clear" @click="toggleChapterOptionMenu(index)">
-                  <ion-icon slot="icon-only" :icon="caretBack" size="large"></ion-icon>
-                </ion-button>
-              </ion-item>
-              <ion-item-options slot="end">
-                <ion-item-option color="none">
-                  <ion-icon slot="icon-only" :icon="caretForward"></ion-icon>
-                </ion-item-option>
-                <ion-item-option color="tertiary">
-                  <ion-icon slot="icon-only" :icon="chevronExpand"></ion-icon>
-                </ion-item-option>
-                <ion-item-option color="tertiary" @click="openRenameChapterMenu(chapter['id'])">
-                  <ion-icon slot="icon-only" :icon="pencil"></ion-icon>
-                </ion-item-option>
-                <ion-item-option color="danger" @click="deleteChapter(chapter['id'])">
-                  <ion-icon slot="icon-only" :icon="trash"></ion-icon>
-                </ion-item-option>
-              </ion-item-options>
-            </ion-item-sliding>
-          </ion-list>
-        </ion-content>
+        <ChapterMenuContent :chapters="chapters"
+                            @do-toast="presentToast" @select-chapter="selectChapter"
+                            @reload-chapters="reloadChapters"
+                            @toggle-menu="toggleMenu(chapterMenuId)" ref="chapterMenu">
+        </ChapterMenuContent>
       </ion-menu>
 
       <ion-menu menu-id="notes-menu" content-id="main" side="end" type="overlay">
@@ -408,7 +207,7 @@ async function selectChapter(id:any) {
           <ion-toolbar>
             <ion-title>{{work['title']}}</ion-title>
             <ion-buttons slot="start">
-              <ion-button fill="clear" @click="toggleMenu('chapter-menu')">
+              <ion-button fill="clear" @click="toggleMenu(chapterMenuId)">
                 <ion-icon name="menu" size="large"></ion-icon>
               </ion-button>
             </ion-buttons>

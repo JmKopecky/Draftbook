@@ -179,7 +179,7 @@ async function selectChapter(id:any) {
     <ion-split-pane :when="splitPaneBreakpoint" content-id="main" @ionSplitPaneVisible="updateOnSplitPaneChange">
 
       <ion-menu menu-id="chapter-menu" content-id="main" type="overlay">
-        <ChapterMenuContent :chapters="chapters"
+        <ChapterMenuContent :chapters="chapters" :work-id="workId"
                             @do-toast="presentToast" @select-chapter="selectChapter"
                             @reload-chapters="reloadChapters"
                             @toggle-menu="toggleMenu(chapterMenuId)" ref="chapterMenu">

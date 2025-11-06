@@ -23,7 +23,7 @@ import {API_URL} from "@/localConfig";
 addIcons({add, caretBack, caretForward, chevronExpand, pencil, trash});
 
 const {chapters, workId} =
-    defineProps(['splitPaneBreakpoint', 'chapters', 'workId']);
+    defineProps(['chapters', 'workId']);
 const emit = defineEmits(['doToast', 'selectChapter', 'reloadChapters', 'toggleMenu']);
 
 let isRenameAlertOpen:any = ref(<boolean>false)
@@ -68,6 +68,7 @@ const renameChapterButtons = [{
   handler: (alert:any) => {
     let title = alert.chapterTitle;
     renameChapter(title);
+    isRenameAlertOpen.value = false;
   },
 }];
 const renameChapterInputs = [
@@ -86,6 +87,7 @@ const renameChapterInputs = [
  * @param chapterNumber The position number of the chapter to create.
  */
 async function createChapter(title:string, chapterNumber:string) {
+  console.log(workId);
   const accessToken = await getAccessTokenSilently();
   const response = await fetch(API_URL + "/chapters/create", {
     method: 'POST',
@@ -137,6 +139,7 @@ async function renameChapter(title:string) {
  * @param id The id of the chapter to rename.
  */
 async function openRenameChapterMenu(id:any) {
+  console.log(id);
   isRenameAlertOpen.value = true;
   let alertElem = renameAlert.value.$el;
   alertElem.setAttribute("data-chapterid", id);
@@ -223,7 +226,7 @@ async function deleteChapter(chapterId:string) {
                         @click="emit('selectChapter', chapter['id'])">
         <ion-item button :detail="false">
           <ion-label>{{ chapter['title'] }}</ion-label>
-          <ion-button slot="end" shape="round" fill="clear" @click="toggleChapterOptionMenu(index)">
+          <ion-button slot="end" shape="round" fill="clear" @click.stop="toggleChapterOptionMenu(index)">
             <ion-icon slot="icon-only" :icon="caretBack" size="large"></ion-icon>
           </ion-button>
         </ion-item>
@@ -234,10 +237,10 @@ async function deleteChapter(chapterId:string) {
           <ion-item-option color="tertiary">
             <ion-icon slot="icon-only" :icon="chevronExpand"></ion-icon>
           </ion-item-option>
-          <ion-item-option color="tertiary" @click="openRenameChapterMenu(chapter['id'])">
+          <ion-item-option color="tertiary" @click.stop="openRenameChapterMenu(chapter['id'])">
             <ion-icon slot="icon-only" :icon="pencil"></ion-icon>
           </ion-item-option>
-          <ion-item-option color="danger" @click="deleteChapter(chapter['id'])">
+          <ion-item-option color="danger" @click.stop="deleteChapter(chapter['id'])">
             <ion-icon slot="icon-only" :icon="trash"></ion-icon>
           </ion-item-option>
         </ion-item-options>

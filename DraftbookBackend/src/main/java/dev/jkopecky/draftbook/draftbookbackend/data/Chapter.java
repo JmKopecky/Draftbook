@@ -18,6 +18,7 @@ public class Chapter implements Comparable<Chapter> {
     private String title;
     private int number;
     private int workId;
+    @Lob
     String content;
     @OneToOne(optional = true)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
@@ -33,11 +34,13 @@ public class Chapter implements Comparable<Chapter> {
      * @param workRepository The table in the database containing works.
      */
     public Chapter(String chapterName, int chapterNumber, Work work,
-                   ChapterRepository chapterRepository, WorkRepository workRepository, NoteRepository noteRepository) {
+                   ChapterRepository chapterRepository, WorkRepository workRepository,
+                   NoteRepository noteRepository, NoteCategoryRepository noteCategoryRepository) {
         this.title = chapterName;
         this.workId = work.getId();
         this.content = "";
-        this.note = new Note("Note: " + chapterName, noteRepository);
+        NoteCategory category = NoteCategory.getChapterCategory(noteCategoryRepository, work);
+        this.note = new Note(chapterName, category, noteRepository);
         this.number = work.boundChapterNumber(chapterNumber);
         work.insertChapter(this, workRepository, chapterRepository);
     }

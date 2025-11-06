@@ -43,4 +43,3 @@
     * Note contents for that chapter
 
 ## Account Components
-* 

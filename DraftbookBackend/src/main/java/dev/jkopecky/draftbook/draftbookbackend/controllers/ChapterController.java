@@ -27,14 +27,17 @@ public class ChapterController {
     private final AccountRepository accountRepository;
     private final WorkRepository workRepository;
     private final NoteRepository noteRepository;
+    private final NoteCategoryRepository noteCategoryRepository;
     public ChapterController(ChapterRepository chapterRepository,
                              AccountRepository accountRepository,
                              WorkRepository workRepository,
-                             NoteRepository noteRepository) {
+                             NoteRepository noteRepository,
+                             NoteCategoryRepository noteCategoryRepository) {
         this.chapterRepository = chapterRepository;
         this.accountRepository = accountRepository;
         this.workRepository = workRepository;
         this.noteRepository = noteRepository;
+        this.noteCategoryRepository = noteCategoryRepository;
     }
 
     /**
@@ -158,7 +161,7 @@ public class ChapterController {
         }
 
         Chapter chapter = new Chapter(chapterName, chapterNumber, work,
-                chapterRepository, workRepository, noteRepository);
+                chapterRepository, workRepository, noteRepository, noteCategoryRepository);
 
         return new ResponseEntity<>(chapter, HttpStatus.CREATED);
     }

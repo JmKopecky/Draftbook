@@ -5,7 +5,52 @@
     height: 100%;
     margin: 0px;
     position: relative;
+    display: flex;
+    justify-content: center;
 }
+.ql-editor {
+    box-sizing: border-box;
+    line-height: 1.42;
+    height: 100%;
+    outline: none;
+    overflow-y: auto;
+    padding: 12px 15px;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-width: 800px;
+    flex: 1;
+}
+.ql-editor p,
+.ql-editor ol,
+.ql-editor ul,
+.ql-editor pre,
+.ql-editor blockquote,
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4,
+.ql-editor h5,
+.ql-editor h6 {
+    margin: 0 0 0.5em;
+    padding: 0;
+    counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+.ql-editor p {
+    font-size: 1.1em;
+}
+.ql-editor.ql-blank::before {
+    color: var(--ion-color-light);
+    content: attr(data-placeholder);
+    font-style: italic;
+    pointer-events: none;
+    position: absolute;
+    max-width: 700px;
+}
+
+
 .ql-container.ql-disabled .ql-tooltip {
     visibility: hidden;
 }
@@ -23,36 +68,8 @@
     margin: 0;
     padding: 0;
 }
-.ql-editor {
-    box-sizing: border-box;
-    line-height: 1.42;
-    height: 100%;
-    outline: none;
-    overflow-y: auto;
-    padding: 12px 15px;
-    tab-size: 4;
-    -moz-tab-size: 4;
-    text-align: left;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
 .ql-editor > * {
     cursor: text;
-}
-.ql-editor p,
-.ql-editor ol,
-.ql-editor ul,
-.ql-editor pre,
-.ql-editor blockquote,
-.ql-editor h1,
-.ql-editor h2,
-.ql-editor h3,
-.ql-editor h4,
-.ql-editor h5,
-.ql-editor h6 {
-    margin: 0;
-    padding: 0;
-    counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
 }
 .ql-editor ol,
 .ql-editor ul {
@@ -379,15 +396,6 @@
 }
 .ql-editor .ql-align-right {
     text-align: right;
-}
-.ql-editor.ql-blank::before {
-    color: var(--ion-color-light);
-    content: attr(data-placeholder);
-    font-style: italic;
-    left: 15px;
-    pointer-events: none;
-    position: absolute;
-    right: 15px;
 }
 .ql-snow.ql-toolbar:after,
 .ql-snow .ql-toolbar:after {

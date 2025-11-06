@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface NoteCategoryRepository extends CrudRepository<NoteCategory, Integer> {
     List<NoteCategory> findAllByWorkIdAndName(int workId, String name);
+    List<NoteCategory> findAllByWorkId(int workId);
 }

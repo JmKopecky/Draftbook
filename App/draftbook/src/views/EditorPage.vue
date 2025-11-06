@@ -45,6 +45,7 @@ import {addIcons} from "ionicons";
 import {presentToast} from "@/UtilFunctions";
 import ChapterContentEditor from "@/components/ChapterContentEditor.vue";
 import ChapterMenuContent from "@/components/ChapterMenuContent.vue";
+import NotesMenuContent from "@/components/NotesMenuContent.vue";
 
 addIcons({menu, apps, chevronBack, chevronForward, trash, open, caretBack, chevronExpand, pencil, add, caretForward});
 
@@ -52,11 +53,12 @@ const route = useRoute()
 let workId:string = getIdFromParams(route.params.id)
 let work:any = ref({title: 'Loading...'});
 let chapters:any = ref([]);
+let notes:any = ref([]);
 let splitPaneBreakpoint = "(min-width: 992px)";
 let splitPaneVisible:boolean = window.matchMedia(splitPaneBreakpoint).matches;
 let currentChapter = ref(-1);
-let chapterMenu = ref();
 const chapterMenuId = "chapter-menu";
+const noteMenuId = "notes-menu";
 
 //auth
 const {getAccessTokenSilently} = useAuth0();
@@ -69,6 +71,7 @@ watch(
         //when the user id changes, reload everything we need to.
         reloadWork(getIdFromParams(newId));
         reloadChapters();
+        reloadNotes();
       }
     }
 )
@@ -76,6 +79,7 @@ watch(
 onIonViewWillEnter(() => {
   reloadWork(workId)
   reloadChapters();
+  reloadNotes();
 });
 
 /**
@@ -125,6 +129,25 @@ async function reloadChapters() {
     return;
   }
   chapters.value = await response.json();
+}
+
+/**
+ * Reloads our list of existing note categories
+ */
+async function reloadNotes() {
+  const accessToken = await getAccessTokenSilently();
+  const response = await fetch(API_URL + "/notes/structure", {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + accessToken
+    },
+    body: JSON.stringify({work_id: workId})
+  });
+  if (!response.ok) {
+    presentToast("Failed to retrieve notes.");
+    return;
+  }
+  notes.value = await response.json();
 }
 
 /**
@@ -180,26 +203,20 @@ async function selectChapter(id:any) {
 
       <ion-menu menu-id="chapter-menu" content-id="main" type="overlay">
         <ChapterMenuContent :chapters="chapters" :work-id="workId"
-                            @do-toast="presentToast" @select-chapter="selectChapter"
+                            @do-toast="presentToast"
+                            @select-chapter="selectChapter"
                             @reload-chapters="reloadChapters"
-                            @toggle-menu="toggleMenu(chapterMenuId)" ref="chapterMenu">
+                            @reload-notes="reloadNotes"
+                            @toggle-menu="toggleMenu(chapterMenuId)">
         </ChapterMenuContent>
       </ion-menu>
 
       <ion-menu menu-id="notes-menu" content-id="main" side="end" type="overlay">
-        <ion-header>
-          <ion-toolbar>
-            <ion-title>Notes</ion-title>
-            <ion-buttons slot="start">
-              <ion-button fill="clear" @click="toggleMenu('notes-menu')">
-                <ion-icon name="chevron-forward" size="large"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
-        <ion-content class="ion-padding">
-
-        </ion-content>
+        <NotesMenuContent :notes="notes" :work-id="workId"
+                          @toggle-menu="toggleMenu(noteMenuId)"
+                          @do-toast="presentToast"
+                          @reload-notes="reloadNotes"
+        ></NotesMenuContent>
       </ion-menu>
 
       <ion-page id="main">

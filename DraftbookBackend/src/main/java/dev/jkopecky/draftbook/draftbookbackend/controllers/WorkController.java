@@ -28,11 +28,14 @@ public class WorkController {
     private final AccountRepository accountRepository;
     private final WorkRepository workRepository;
     private final NoteRepository noteRepository;
-    public WorkController(AccountRepository accountRepository, WorkRepository workRepository, NoteRepository noteRepository, ChapterRepository chapterRepository) {
+    private final NoteCategoryRepository noteCategoryRepository;
+
+    public WorkController(AccountRepository accountRepository, WorkRepository workRepository, NoteRepository noteRepository, ChapterRepository chapterRepository, NoteCategoryRepository noteCategoryRepository) {
         this.accountRepository = accountRepository;
         this.workRepository = workRepository;
         this.noteRepository = noteRepository;
         this.chapterRepository = chapterRepository;
+        this.noteCategoryRepository = noteCategoryRepository;
     }
 
     /**
@@ -119,7 +122,7 @@ public class WorkController {
             return new ResponseEntity<>("Failed to retrieve work", (HttpStatusCode) workContainer[1]);
         }
 
-        ((Work) workContainer[0]).deleteWork(workRepository, chapterRepository, noteRepository);
+        ((Work) workContainer[0]).deleteWork(workRepository, chapterRepository, noteRepository, noteCategoryRepository);
         return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 

@@ -24,7 +24,8 @@ addIcons({add, caretBack, caretForward, chevronExpand, pencil, trash});
 
 const {chapters, workId} =
     defineProps(['chapters', 'workId']);
-const emit = defineEmits(['doToast', 'selectChapter', 'reloadChapters', 'toggleMenu']);
+const emit = defineEmits(['doToast', 'selectChapter',
+  'reloadChapters', 'toggleMenu', 'reloadNotes']);
 
 let isRenameAlertOpen:any = ref(<boolean>false)
 let renameAlert = ref();
@@ -87,7 +88,6 @@ const renameChapterInputs = [
  * @param chapterNumber The position number of the chapter to create.
  */
 async function createChapter(title:string, chapterNumber:string) {
-  console.log(workId);
   const accessToken = await getAccessTokenSilently();
   const response = await fetch(API_URL + "/chapters/create", {
     method: 'POST',
@@ -106,6 +106,7 @@ async function createChapter(title:string, chapterNumber:string) {
   }
   emit("doToast", "Chapter created successfully.")
   emit("reloadChapters");
+  emit("reloadNotes")
 }
 
 /**
@@ -132,6 +133,7 @@ async function renameChapter(title:string) {
   }
   emit("doToast", "Chapter renamed successfully.")
   emit("reloadChapters");
+  emit("reloadNotes")
 }
 
 /**
@@ -139,7 +141,6 @@ async function renameChapter(title:string) {
  * @param id The id of the chapter to rename.
  */
 async function openRenameChapterMenu(id:any) {
-  console.log(id);
   isRenameAlertOpen.value = true;
   let alertElem = renameAlert.value.$el;
   alertElem.setAttribute("data-chapterid", id);
@@ -181,6 +182,7 @@ async function deleteChapter(chapterId:string) {
   }
   emit("doToast", "Chapter deleted successfully.")
   emit("reloadChapters");
+  emit("reloadNotes");
 }
 
 </script>

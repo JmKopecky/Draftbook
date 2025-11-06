@@ -135,8 +135,10 @@ public class Chapter implements Comparable<Chapter> {
     public String getTitle() {
         return title;
     }
-    public void setTitle(String title) {
+    public void setTitle(String title, NoteRepository noteRepository) {
         this.title = title;
+        this.note.setDescriptor(title);
+        noteRepository.save(note);
     }
     public int getWorkId() {
         return workId;

@@ -47,4 +47,37 @@ public class NoteCategory {
             return matches.getFirst();
         }
     }
+
+    /**
+     * Util method to retrieve all notes from this noteCategory.
+     * @param noteRepository The table containing notes.
+     * @return A list of Note objects.
+     */
+    public List<Note> getNotes(NoteRepository noteRepository) {
+        return noteRepository.findByNoteCategory(this);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getWorkId() {
+        return workId;
+    }
+
+    public void setWorkId(int workId) {
+        this.workId = workId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

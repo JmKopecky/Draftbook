@@ -217,7 +217,7 @@ public class ChapterController {
         }
         Chapter chapter = (Chapter) chapterContainer[0];
 
-        chapter.setTitle(newChapterName);
+        chapter.setTitle(newChapterName, noteRepository);
         chapterRepository.save(chapter);
 
         return new ResponseEntity<>("Success", HttpStatus.OK);

@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
@@ -142,15 +143,20 @@ public class Work {
      * @param chapterRepository The table containing chapters in the database.
      * @param noteRepository The table containing notes in the database.
      */
+    @Transactional
     public void deleteWork(
             WorkRepository workRepository,
             ChapterRepository chapterRepository,
-            NoteRepository noteRepository) {
+            NoteRepository noteRepository,
+            NoteCategoryRepository noteCategoryRepository) {
 
         //get all chapters and delete them first
         for (Chapter chapter : getChapters(chapterRepository)) {
             chapter.deleteChapter(chapterRepository, noteRepository, workRepository);
         }
+
+        //delete all noteCategories associated with this work.
+        noteCategoryRepository.deleteAll(noteCategoryRepository.findAllByWorkId(id));
 
         //delete this work
         workRepository.delete(this);

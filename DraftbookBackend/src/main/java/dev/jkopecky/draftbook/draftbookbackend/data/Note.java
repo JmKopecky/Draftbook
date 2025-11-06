@@ -25,6 +25,19 @@ public class Note {
     }
 
     /**
+     * Util method to create an identifier representation of this note.
+     * @return A NoteIdentifier that can be easily returned to the client without content.
+     */
+    public NoteIdentifier createNoteIdentifier() {
+        NoteIdentifier noteIdentifier = new NoteIdentifier();
+        noteIdentifier.setId(this.Id);
+        noteIdentifier.setDescriptor(descriptor);
+        noteIdentifier.setCategoryId(noteCategory.getId());
+        noteIdentifier.setCategoryName(noteCategory.getName());
+        return noteIdentifier;
+    }
+
+    /**
      * Deletes this note.
      * @param noteRepository The database table for notes.
      */

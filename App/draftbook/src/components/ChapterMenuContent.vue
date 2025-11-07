@@ -69,7 +69,6 @@ const renameChapterButtons = [{
   handler: (alert:any) => {
     let title = alert.chapterTitle;
     renameChapter(title);
-    isRenameAlertOpen.value = false;
   },
 }];
 const renameChapterInputs = [
@@ -219,6 +218,7 @@ async function deleteChapter(chapterId:string) {
         header="Rename Chapter"
         :buttons="renameChapterButtons"
         :inputs="renameChapterInputs"
+        @didDismiss="() => isRenameAlertOpen = false"
     ></ion-alert>
 
     <ion-list>
@@ -233,7 +233,7 @@ async function deleteChapter(chapterId:string) {
           </ion-button>
         </ion-item>
         <ion-item-options slot="end">
-          <ion-item-option color="none">
+          <ion-item-option color="none" @click.stop="toggleChapterOptionMenu(index)">
             <ion-icon slot="icon-only" :icon="caretForward"></ion-icon>
           </ion-item-option>
           <ion-item-option color="tertiary">

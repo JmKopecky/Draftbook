@@ -18,10 +18,23 @@ import {
   IonAccordionGroup,
   IonInput, IonItemOption, IonItemOptions, IonItemSliding
 } from "@ionic/vue";
-import {add, addCircle, caretBack, caretForward, chevronExpand, pencil, settings, trash} from "ionicons/icons";
+import {
+  add,
+  addCircle,
+  caretBack,
+  caretForward,
+  chevronExpand, create,
+  folderOpen,
+  pencil,
+  settings,
+  trash
+} from "ionicons/icons";
 import {API_URL} from "@/localConfig";
 import {useAuth0} from "@auth0/auth0-vue";
 import {ref} from "vue";
+import {presentToast} from "@/UtilFunctions";
+import ChapterContentEditor from "@/components/ChapterContentEditor.vue";
+import NoteContentEditor from "@/components/NoteContentEditor.vue";
 
 const {notes, workId} =
     defineProps(['notes', 'workId']);
@@ -32,10 +45,14 @@ const {getAccessTokenSilently} = useAuth0();
 
 let isManageCategoryAlertOpen:any = ref(<boolean>false)
 let manageCategoryAlert = ref();
+let isRenameNoteAlertOpen:any = ref(<boolean>false);
+let renameNoteAlert = ref();
 let focusedCategory = ref("null");
 const chapterNotesName = 'Chapter Notes';
 let createNoteInputRef:any = ref([]);
 let noteSlidingRef = new Array(notes.length);
+let isNoteNavOpen = ref(<boolean>true);
+let currentNote = ref(-1);
 
 //alert elements
 const finalizeCategoryButton = [{
@@ -81,6 +98,24 @@ const manageCategoryInputs = [
     attributes: {
       maxlength: 256,
       value: focusedCategory.value
+    },
+  }
+];
+const renameNoteButtons = [{
+  text: 'Rename',
+  role: 'confirm',
+  handler: (alert:any) => {
+    let name = alert.noteName
+    let noteId = renameNoteAlert.value.$el.getAttribute("data-noteid");
+    renameNote(name, noteId);
+  },
+}];
+const renameNoteInputs = [
+  {
+    name: 'noteName',
+    placeholder: 'Name',
+    attributes: {
+      maxlength: 256
     },
   }
 ];
@@ -174,7 +209,7 @@ async function deleteCategory(id:string) {
  * @param id The id of the category to manage.
  * @param name The current name of the category to manage.
  */
-async function openManageChapterMenu(id:any, name:string) {
+async function openManageCategoryMenu(id:any, name:string) {
   isManageCategoryAlertOpen.value = true;
   let alertElem = manageCategoryAlert.value.$el;
   alertElem.querySelector(".alert-input").value = name;
@@ -197,8 +232,11 @@ async function toggleNoteOptionMenu(catIndex:any, noteIndex:any) {
 }
 
 //todo implement
-async function openRenameNoteMenu() {
-  console.log("todo implement");
+async function openRenameNoteMenu(noteId:any, noteName:any) {
+  isRenameNoteAlertOpen.value = true;
+  let alertElem = renameNoteAlert.value.$el;
+  alertElem.querySelector(".alert-input").value = noteName;
+  alertElem.setAttribute("data-noteid", noteId);
 }
 
 /**
@@ -251,6 +289,47 @@ async function createNote(name:any, catId:any) {
   emit("reloadNotes");
 }
 
+/**
+ * Sets a note to a new name.
+ * @param noteName The new name of the note.
+ * @param noteId The id of the note to rename.
+ */
+async function renameNote(noteName:string, noteId:any) {
+  const accessToken = await getAccessTokenSilently();
+  const response = await fetch(API_URL + "/notes/rename", {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + accessToken
+    },
+    body: JSON.stringify({
+      work_id: workId,
+      note_id: noteId,
+      note_name: noteName
+    })
+  });
+  if (!response.ok) {
+    emit("doToast", "Failed to rename note.");
+    return;
+  }
+  emit("doToast", "Note renamed successfully.")
+  emit("reloadNotes");
+}
+
+/**
+ * Toggles between the note navigation menu and the note display menu.
+ */
+function toggleNoteNav() {
+  isNoteNavOpen.value = !isNoteNavOpen.value;
+}
+
+/**
+ * Sets the current note to be displayed.
+ * @param noteId The id of the note to display.
+ */
+function setNote(noteId:any) {
+  currentNote.value = noteId;
+  toggleNoteNav();
+}
 
 </script>
 
@@ -263,15 +342,83 @@ async function createNote(name:any, catId:any) {
           <ion-icon name="chevron-forward" size="large"></ion-icon>
         </ion-button>
       </ion-buttons>
+      <ion-buttons slot="end">
+        <ion-button fill="clear" @click="toggleNoteNav()">
+          <ion-icon :icon="create" size="large" v-if="isNoteNavOpen"></ion-icon>
+          <ion-icon :icon="folderOpen" size="large" v-if="!isNoteNavOpen"></ion-icon>
+        </ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
+
   <ion-content class="ion-padding">
 
-    <ion-fab slot="fixed" vertical="bottom" horizontal="start">
-      <ion-fab-button id="create-category-button">
-        <ion-icon :icon="add"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
+    <div id="note-nav-container" v-if="isNoteNavOpen">
+      <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+        <ion-fab-button id="create-category-button">
+          <ion-icon :icon="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+
+      <ion-accordion-group :multiple="true">
+        <ion-accordion v-for="(noteCategory, catIndex) in notes" :key="catIndex">
+          <ion-item slot="header">
+            <ion-label>{{noteCategory['name']}}</ion-label>
+            <ion-buttons slot="start" v-if="noteCategory['name'] !== chapterNotesName">
+              <ion-button fill="clear" id="manage-category-button"
+                          @click.stop="openManageCategoryMenu(noteCategory['id'], noteCategory['name'])">
+                <ion-icon :icon="settings"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-item>
+          <ion-list slot="content">
+            <ion-item-sliding v-for="(noteIdentifier, noteIndex) in noteCategory['noteIdentifiers']"
+                              :ref="(el:any) => {
+                              if (noteSlidingRef[catIndex] === undefined) {
+                                noteSlidingRef[catIndex] = [];
+                              }
+                              noteSlidingRef[catIndex].splice(noteIndex, 0, el);
+                            }" @click="setNote(noteIdentifier['id'])">
+              <ion-item button :detail="false">
+                <ion-label>{{noteIdentifier['descriptor']}}</ion-label>
+                <ion-button slot="end" shape="round" fill="clear"
+                            @click.stop="toggleNoteOptionMenu(catIndex, noteIndex)"
+                            v-if="noteCategory['name'] !== chapterNotesName">
+                  <ion-icon slot="icon-only" :icon="caretBack" size="large"></ion-icon>
+                </ion-button>
+              </ion-item>
+              <ion-item-options slot="end">
+                <ion-item-option color="none" @click.stop="toggleNoteOptionMenu(catIndex, noteIndex)">
+                  <ion-icon slot="icon-only" :icon="caretForward"></ion-icon>
+                </ion-item-option>
+                <ion-item-option color="tertiary" @click.stop="openRenameNoteMenu(noteIdentifier['id'], noteIdentifier['descriptor'])">
+                  <ion-icon slot="icon-only" :icon="pencil"></ion-icon>
+                </ion-item-option>
+                <ion-item-option color="danger" @click.stop="deleteNote(noteIdentifier['id'])">
+                  <ion-icon slot="icon-only" :icon="trash"></ion-icon>
+                </ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
+          </ion-list>
+          <ion-item slot="content" v-if="noteCategory['name'] !== chapterNotesName">
+            <ion-input label="New Note" placeholder="Name..."
+                       :ref="(element:any) => createNoteInputRef[catIndex] = element"></ion-input>
+            <ion-button slot="end" fill="clear"
+                        @click.stop="() => createNote(
+                          createNoteInputRef[catIndex].$el.value,
+                          noteCategory['id'])">
+              <ion-icon :icon="addCircle" size="large" color="light"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-accordion>
+      </ion-accordion-group>
+    </div>
+
+    <div id="note-edit-container" v-if="!isNoteNavOpen">
+      <NoteContentEditor :note-id="currentNote" :work-id="workId" @do-toast="presentToast">
+
+      </NoteContentEditor>
+    </div>
 
     <ion-alert
         trigger="create-category-button"
@@ -289,58 +436,14 @@ async function createNote(name:any, catId:any) {
         @didDismiss="() => isManageCategoryAlertOpen = false"
     ></ion-alert>
 
-    <ion-accordion-group :multiple="true">
-      <ion-accordion v-for="(noteCategory, catIndex) in notes" :key="catIndex">
-        <ion-item slot="header">
-          <ion-label>{{noteCategory['name']}}</ion-label>
-          <ion-buttons slot="start" v-if="noteCategory['name'] !== chapterNotesName">
-            <ion-button fill="clear" id="manage-category-button"
-                        @click.stop="openManageChapterMenu(noteCategory['id'], noteCategory['name'])">
-              <ion-icon :icon="settings"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-item>
-        <ion-list slot="content">
-          <ion-item-sliding v-for="(noteIdentifier, noteIndex) in noteCategory['noteIdentifiers']"
-                            :ref="(el:any) => {
-                              if (noteSlidingRef[catIndex] === undefined) {
-                                noteSlidingRef[catIndex] = [];
-                              }
-                              noteSlidingRef[catIndex].splice(noteIndex, 0, el);
-                            }">
-            <ion-item button :detail="false">
-              <ion-label>{{noteIdentifier['descriptor']}}</ion-label>
-              <ion-button slot="end" shape="round" fill="clear"
-                          @click.stop="toggleNoteOptionMenu(catIndex, noteIndex)"
-                          v-if="noteCategory['name'] !== chapterNotesName">
-                <ion-icon slot="icon-only" :icon="caretBack" size="large"></ion-icon>
-              </ion-button>
-            </ion-item>
-            <ion-item-options slot="end">
-              <ion-item-option color="none" @click.stop="toggleNoteOptionMenu(catIndex, noteIndex)">
-                <ion-icon slot="icon-only" :icon="caretForward"></ion-icon>
-              </ion-item-option>
-              <ion-item-option color="tertiary" @click.stop="openRenameNoteMenu()">
-                <ion-icon slot="icon-only" :icon="pencil"></ion-icon>
-              </ion-item-option>
-              <ion-item-option color="danger" @click.stop="deleteNote(noteIdentifier['id'])">
-                <ion-icon slot="icon-only" :icon="trash"></ion-icon>
-              </ion-item-option>
-            </ion-item-options>
-          </ion-item-sliding>
-        </ion-list>
-        <ion-item slot="content" v-if="noteCategory['name'] !== chapterNotesName">
-          <ion-input label="New Note" placeholder="Name..."
-                     :ref="(element:any) => createNoteInputRef[catIndex] = element"></ion-input>
-          <ion-button slot="end" fill="clear"
-                      @click.stop="() => createNote(
-                          createNoteInputRef[catIndex].$el.value,
-                          noteCategory['id'])">
-            <ion-icon :icon="addCircle" size="large" color="light"></ion-icon>
-          </ion-button>
-        </ion-item>
-      </ion-accordion>
-    </ion-accordion-group>
+    <ion-alert
+        ref="renameNoteAlert"
+        :isOpen="isRenameNoteAlertOpen"
+        header="Rename Note"
+        :buttons="renameNoteButtons"
+        :inputs="renameNoteInputs"
+        @didDismiss="() => isRenameNoteAlertOpen = false"
+    ></ion-alert>
 
   </ion-content>
 </template>

@@ -237,7 +237,7 @@ public class NoteController {
     /**
      * Creates a new note under the given category.
      * @param user The user who must own the work of the category.
-     * @param body The request body, containing work_id, category_id, and note_name.
+     * @param body The request body, containing work_id and note_name.
      * @return A String representing the result.
      */
     @PostMapping("/delete")
@@ -247,7 +247,7 @@ public class NoteController {
 
         //get the target work and NoteCategory
         Object[] container = Note.getNoteIfAllowed(
-                body, account, workRepository, noteRepository, noteCategoryRepository);
+                body, account, workRepository, noteRepository);
         if (container[1] == null || container[2] == null) {
             return new ResponseEntity<>((HttpStatusCode) container[0]);
         }
@@ -255,7 +255,117 @@ public class NoteController {
         Work work = (Work) container[1];
         Note note = (Note) container[2];
 
+        if (note.isChapterNote()) {
+            return new ResponseEntity<>("Not allowed",  HttpStatus.CONFLICT);
+        }
+
         note.delete(noteRepository);
+
+        return new ResponseEntity<>("Success",  HttpStatus.OK);
+    }
+
+    /**
+     * Renames an existing note.
+     * @param user The user who must own the work of the category.
+     * @param body The request body, containing work_id, category_id, and note_name.
+     * @return A String representing the result.
+     */
+    @PostMapping("/rename")
+    public ResponseEntity<String> renameNote(
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
+        Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
+
+        //get the target work and NoteCategory
+        Object[] container = Note.getNoteIfAllowed(
+                body, account, workRepository, noteRepository);
+        if (container[1] == null || container[2] == null) {
+            return new ResponseEntity<>((HttpStatusCode) container[0]);
+        }
+
+        Note note = (Note) container[2];
+
+        //get other request data
+        String noteName;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(body);
+            noteName = node.get("note_name").asText();
+        } catch (JsonProcessingException | NullPointerException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+
+        //check that this note is allowed to be renamed.
+        if (note.isChapterNote()) {
+            return new ResponseEntity<>("Not allowed",  HttpStatus.CONFLICT);
+        }
+
+        //make the name change
+        note.setDescriptor(noteName);
+        noteRepository.save(note);
+
+        return new ResponseEntity<>("Success",  HttpStatus.OK);
+    }
+
+    /**
+     * Get the content of a note.
+     * @param user The user who must own the work of the category.
+     * @param body The request body, containing work_id and note_id.
+     * @return A responseEntity containing the html content of the note.
+     */
+    @PostMapping("/get/content")
+    public ResponseEntity<String> getNoteContent(
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
+        Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
+
+        //get the target work and NoteCategory
+        Object[] container = Note.getNoteIfAllowed(
+                body, account, workRepository, noteRepository);
+        if (container[1] == null || container[2] == null) {
+            return new ResponseEntity<>((HttpStatusCode) container[0]);
+        }
+
+        Note note = (Note) container[2];
+
+        return new  ResponseEntity<>(note.getContent(), HttpStatus.OK);
+    }
+
+    /**
+     * Saves the HTML content to the note.
+     * @param user The user who must own the work of the category.
+     * @param body The request body, containing work_id, note_id, and note_content
+     * @return A String representing the result.
+     */
+    @PostMapping("/save/html")
+    public ResponseEntity<String> saveNoteHTML(
+            @AuthenticationPrincipal Jwt user, @RequestBody String body) {
+        Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
+
+        //get the target work and NoteCategory
+        Object[] container = Note.getNoteIfAllowed(
+                body, account, workRepository, noteRepository);
+        if (container[1] == null || container[2] == null) {
+            return new ResponseEntity<>((HttpStatusCode) container[0]);
+        }
+
+        Note note = (Note) container[2];
+
+        //get other request data
+        String noteContent;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(body);
+            noteContent = node.get("note_content").asText();
+        } catch (JsonProcessingException | NullPointerException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+
+        //make the name change
+        note.setContent(noteContent);
+        noteRepository.save(note);
 
         return new ResponseEntity<>("Success",  HttpStatus.OK);
     }

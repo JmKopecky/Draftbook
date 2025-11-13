@@ -56,12 +56,11 @@ public class Note {
      * @param requestBody The request from which to identify the work.
      * @param workRepository The table in the database containing works.
      * @param noteRepository The table in the database containing notes.
-     * @param noteCategoryRepository the table in the database containing note categories.
      * @param account The account which should own the work in question.
      * @return An array of Objects, where the first element is a HttpStatusCode, the second is a work, and the third is a noteCategory.
      */
     public static Object[] getNoteIfAllowed(
-            String requestBody, Account account, WorkRepository workRepository, NoteRepository noteRepository, NoteCategoryRepository noteCategoryRepository) {
+            String requestBody, Account account, WorkRepository workRepository, NoteRepository noteRepository) {
 
         //get work and check that it exists
         Object[] workContainer = Work.getWorkIfAllowed(requestBody, account, workRepository);
@@ -93,18 +92,22 @@ public class Note {
 
         //check that the note's category is for the work
         if (note.getNoteCategory().getWorkId() == work.getId()) {
-            if (note.getNoteCategory().getName().equals(NoteCategory.CHAPTER_CATEGORY_NAME)) {
-                result[0] = HttpStatus.CONFLICT;
-                result[2] = null;
-            } else {
-                result[2] = note;
-            }
+            result[2] = note;
             return result;
         }
 
         result[0] = HttpStatus.UNAUTHORIZED;
         result[2] = null;
         return result;
+    }
+
+    /**
+     * Check if this note is a chapter-specific note.
+     * @return True if the noteCategory is for the chapter category.
+     */
+    public boolean isChapterNote() {
+        String noteCatName = noteCategory.getName();
+        return noteCatName.equals(NoteCategory.CHAPTER_CATEGORY_NAME);
     }
 
     public int getId() {

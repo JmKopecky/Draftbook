@@ -1,7 +1,7 @@
 {
   "name": "draftbook",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -44,5 +44,5 @@
   "overrides": {
     "rollup": "4.44.0"
   },
-  "description": "An Ionic project"
+  "description": "A tool for writers to bring their ideas into reality."
 }

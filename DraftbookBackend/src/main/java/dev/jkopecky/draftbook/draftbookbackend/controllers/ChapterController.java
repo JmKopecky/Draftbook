@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jkopecky.draftbook.draftbookbackend.data.*;
+import org.bitbucket.cowwoc.diffmatchpatch.DiffMatchPatch;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -255,5 +257,48 @@ public class ChapterController {
         chapterRepository.save(chapter);
 
         return new ResponseEntity<>("Success", HttpStatus.OK);
+    }
+
+    /**
+     * Saves a chapter using diff-match-patch's patch format.
+     * This is the preferred method of updating a chapter for clients.
+     * @param user The account that must own the work.
+     * @param body A request body containing work id, chapter id,
+     * and a string containing patches to apply (generated via patch.toText(patch.make());
+     * @return A responseEntity representing the result of this operation.
+     */
+    @PostMapping("/save/patch")
+    public ResponseEntity<String> savePatch(@AuthenticationPrincipal Jwt user, @RequestBody String body) {
+        Account account = Account.getOrCreateAccount(user.getSubject(), accountRepository);
+
+        //get the target chapter
+        Object[] chapterContainer = Chapter.getChapterIfAllowed(body, account, workRepository, chapterRepository);
+        if (chapterContainer[0] == null) {
+            return new ResponseEntity<>("Failed.", (HttpStatusCode) chapterContainer[1]);
+        }
+        Chapter chapter = (Chapter) chapterContainer[0];
+
+        String patches;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(body);
+            patches = node.get("patches").asText();
+        } catch (JsonProcessingException | NullPointerException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+
+        //parse patches
+        DiffMatchPatch dmp = new DiffMatchPatch();
+        LinkedList<DiffMatchPatch.Patch> patchList
+                = (LinkedList<DiffMatchPatch.Patch>) dmp.patchFromText(patches);
+        String newContent = (String) dmp.patchApply(patchList, chapter.getContent())[0];
+
+        //apply change
+        chapter.setContent(newContent);
+        chapterRepository.save(chapter);
+
+        return new  ResponseEntity<>("Success", HttpStatus.OK);
     }
 }

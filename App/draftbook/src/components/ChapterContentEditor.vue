@@ -7,6 +7,7 @@ import {chevronExpand, save} from "ionicons/icons";
 import {ref, watch, watchEffect} from "vue";
 import {useAuth0} from "@auth0/auth0-vue";
 import {API_URL} from "@/localConfig";
+import {applyPatches, makePatches, parsePatch, stringifyPatches} from "@sanity/diff-match-patch";
 
 addIcons({save});
 
@@ -20,6 +21,7 @@ const {getAccessTokenSilently} = useAuth0();
 
 //props
 const {chapterId, workId} = defineProps(['chapterId', 'workId']);
+let oldContent:string;
 watchEffect(() => {
   refreshContent();
 })
@@ -49,6 +51,7 @@ async function refreshContent() {
   }
   let resultingContent = await response.text();
   quillEditor.value.setHTML(resultingContent);
+  oldContent = resultingContent;
 }
 
 /**
@@ -57,8 +60,11 @@ async function refreshContent() {
 async function saveContent() {
   if (chapterId == -1) return;
   let content = quillEditor.value.getHTML();
+
+  let patches = stringifyPatches(makePatches(oldContent, content));
+
   const accessToken = await getAccessTokenSilently();
-  const response = await fetch(API_URL + "/chapters/save/html", {
+  const response = await fetch(API_URL + "/chapters/save/patch", {
     method: 'POST',
     headers: {
       Authorization: 'Bearer ' + accessToken
@@ -66,12 +72,13 @@ async function saveContent() {
     body: JSON.stringify({
       work_id: workId,
       chapter_id: chapterId,
-      chapter_content: content
+      patches: patches
     })
   });
   if (!response.ok) {
     emit("doToast", "Failed to save chapter content.");
-    return;
+  } else {
+    oldContent = content;
   }
 }
 </script>

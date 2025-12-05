@@ -35,7 +35,7 @@ public class DraftbookBackendApplication {
     @Bean
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8100"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8100", "https://draftbook.jkopecky.dev"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST", "OPTIONS", "DELETE", "PUT"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "*"));
         configuration.setAllowCredentials(true);

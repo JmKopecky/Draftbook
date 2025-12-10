@@ -34,13 +34,11 @@ Built as a portfolio project by Joseph Kopecky.
         * Access note editor
     * Separate mode for editing notes
 * Save content by sending the entire HTML file to the server and back each time.
+  * Diff-checking to make handling large content files easier.
+* Focus mode for chapters and notes, allowing you to full-screen notes as well
 
 ## Planned Features
-* Diff-checking to make handling large content files easier.
 * Reorder chapters
-* Change width of menus (make more space for note editor)
-* Full-screen for notes
-* Focus mode
 * Style/design improvement pass
 * Account page (assess requirements)
 * Home/intro page

@@ -38,7 +38,7 @@ import NoteContentEditor from "@/components/NoteContentEditor.vue";
 
 const {notes, workId} =
     defineProps(['notes', 'workId']);
-const emit = defineEmits(['toggleMenu', 'doToast', 'reloadNotes']);
+const emit = defineEmits(['toggleMenu', 'doToast', 'reloadNotes', 'toggleFocus']);
 
 //auth
 const {getAccessTokenSilently} = useAuth0();
@@ -415,7 +415,9 @@ function setNote(noteId:any) {
     </div>
 
     <div id="note-edit-container" v-if="!isNoteNavOpen">
-      <NoteContentEditor :note-id="currentNote" :work-id="workId" @do-toast="presentToast">
+      <NoteContentEditor :note-id="currentNote" :work-id="workId"
+                         @do-toast="presentToast"
+                         @toggle-focus="(val) => emit('toggleFocus', val)">
 
       </NoteContentEditor>
     </div>

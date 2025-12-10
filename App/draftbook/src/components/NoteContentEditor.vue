@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {save} from "ionicons/icons";
+import {expand, save} from "ionicons/icons";
 import {QuillEditor} from "@vueup/vue-quill";
 import {IonButton, IonIcon} from "@ionic/vue";
 import {ref, watchEffect} from "vue";
@@ -19,7 +19,7 @@ const {noteId, workId} = defineProps(['noteId', 'workId']);
 watchEffect(() => {
   refreshContent();
 })
-const emit = defineEmits(['doToast']);
+const emit = defineEmits(['doToast', 'toggleFocus']);
 
 /**
  * Refresh our note content based on the content in the server
@@ -71,6 +71,11 @@ async function saveContent() {
   }
 }
 
+async function toggleFocus() {
+  await saveContent();
+  emit("toggleFocus", "note");
+}
+
 </script>
 
 <template>
@@ -100,6 +105,9 @@ async function saveContent() {
         </div>
 
         <div id="toolbar-second">
+          <ion-button id="focus-button" fill="clear" @click="toggleFocus">
+            <ion-icon slot="icon-only" :icon="expand"></ion-icon>
+          </ion-button>
           <ion-button id="save-button" fill="clear" @click="saveContent">
             <ion-icon slot="icon-only" :icon="save"></ion-icon>
           </ion-button>

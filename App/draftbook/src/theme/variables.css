@@ -102,3 +102,16 @@ Accent?
 ion-button {
     text-transform: none;
 }
+
+ion-menu.focused, #main.focused {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    max-width: unset;
+    ion-toolbar {
+        display: none;
+    }
+}

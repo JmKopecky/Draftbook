@@ -236,9 +236,6 @@ async function deleteChapter(chapterId:string) {
           <ion-item-option color="none" @click.stop="toggleChapterOptionMenu(index)">
             <ion-icon slot="icon-only" :icon="caretForward"></ion-icon>
           </ion-item-option>
-          <ion-item-option color="tertiary">
-            <ion-icon slot="icon-only" :icon="chevronExpand"></ion-icon>
-          </ion-item-option>
           <ion-item-option color="tertiary" @click.stop="openRenameChapterMenu(chapter['id'])">
             <ion-icon slot="icon-only" :icon="pencil"></ion-icon>
           </ion-item-option>

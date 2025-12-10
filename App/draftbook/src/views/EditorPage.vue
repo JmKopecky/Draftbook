@@ -195,6 +195,25 @@ async function selectChapter(id:any) {
   }
 }
 
+function handleToggleFocus(target:string) {
+  const focusedIndicator = "focused";
+  let chapterContent = document.getElementById("chapter-content-editor");
+  let chapterContentContainer = chapterContent?.parentElement?.parentElement;
+  let noteContent = document.getElementById("note-edit-container");
+  let noteContentContainer = noteContent?.parentElement?.parentElement;
+  console.log(noteContent);
+
+  if (chapterContentContainer?.classList.contains(focusedIndicator)
+      || noteContentContainer?.classList.contains(focusedIndicator)) {
+    chapterContentContainer?.classList.remove(focusedIndicator);
+    noteContentContainer?.classList.remove(focusedIndicator);
+  } else if (target === "chapter") {
+    chapterContentContainer?.classList.add(focusedIndicator);
+  } else if (target === "note") {
+    noteContentContainer?.classList.add(focusedIndicator);
+  }
+}
+
 </script>
 
 <template>
@@ -212,10 +231,12 @@ async function selectChapter(id:any) {
       </ion-menu>
 
       <ion-menu menu-id="notes-menu" content-id="main" side="end" type="overlay">
-        <NotesMenuContent :notes="notes" :work-id="workId"
+        <NotesMenuContent id="note-content-editor"
+                          :notes="notes" :work-id="workId"
                           @toggle-menu="toggleMenu(noteMenuId)"
                           @do-toast="presentToast"
                           @reload-notes="reloadNotes"
+                          @toggle-focus="handleToggleFocus"
         ></NotesMenuContent>
       </ion-menu>
 
@@ -237,7 +258,9 @@ async function selectChapter(id:any) {
         </ion-header>
 
         <ion-content>
-          <ChapterContentEditor :chapter-id="currentChapter" :work-id="workId" @do-toast="presentToast">
+          <ChapterContentEditor id="chapter-content-editor"
+                                :chapter-id="currentChapter" :work-id="workId"
+                                @do-toast="presentToast" @toggleFocus="handleToggleFocus">
 
           </ChapterContentEditor>
         </ion-content>

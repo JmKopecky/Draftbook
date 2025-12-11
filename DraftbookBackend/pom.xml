@@ -10,7 +10,7 @@
     </parent>
     <groupId>dev.jkopecky.draftbook</groupId>
     <artifactId>DraftbookBackend</artifactId>
-    <version>0.2.0-Alpha</version>
+    <version>1.0.0-beta</version>
     <name>DraftbookBackend</name>
     <description>DraftbookBackend</description>
     <url/>

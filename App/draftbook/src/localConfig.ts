@@ -9,5 +9,5 @@ export const auth0 = createAuth0({
     }
 });
 
-//export const API_URL = "https://draftbook.jkopecky.dev/api";
-export const API_URL = "http://localhost:443/api";
+export const API_URL = "https://draftbook.jkopecky.dev/api";
+//export const API_URL = "http://localhost:443/api";

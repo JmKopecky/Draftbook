@@ -224,7 +224,7 @@ function handleToggleFocus(target:string) {
       </ion-menu>
 
       <ion-menu menu-id="notes-menu" content-id="main" side="end" type="overlay">
-        <NotesMenuContent id="note-content-editor"
+        <NotesMenuContent
                           :notes="notes" :work-id="workId"
                           @toggle-menu="toggleMenu(noteMenuId)"
                           @do-toast="presentToast"

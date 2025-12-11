@@ -2,7 +2,7 @@
 import {
   alertController,
   IonAlert,
-  IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
+  IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton,
   IonContent,
   IonFab,
   IonFabButton,
@@ -182,14 +182,6 @@ onIonViewWillEnter(reloadWorks);
           trigger="create-work-fab"
           header="Create New Work"
           message="Your next big idea begins now."
-          :buttons="finalizeWorkButtons"
-          :inputs="createWorkInputs"
-      ></ion-alert>
-
-      <ion-alert
-          trigger="create-first-work-button"
-          header="Create Your First Work"
-          message="Your big idea begins now."
           :buttons="finalizeWorkButtons"
           :inputs="createWorkInputs"
       ></ion-alert>

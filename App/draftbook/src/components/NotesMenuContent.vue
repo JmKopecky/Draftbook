@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import {
+  alertController,
   IonAccordion,
   IonAccordionGroup,
   IonAlert,
@@ -328,6 +329,16 @@ async function setNote(noteId:any) {
   toggleNoteNav();
 }
 
+async function openCreateCategoryAlert() {
+  const alert = await alertController.create({
+    header: 'Create New Note Category',
+    buttons: finalizeCategoryButton,
+    inputs: finalizeCategoryInputs
+  });
+
+  await alert.present();
+}
+
 </script>
 
 <template>
@@ -352,7 +363,7 @@ async function setNote(noteId:any) {
 
     <div id="note-nav-container" v-if="isNoteNavOpen">
       <ion-fab slot="fixed" vertical="bottom" horizontal="start">
-        <ion-fab-button id="create-category-button">
+        <ion-fab-button @click="openCreateCategoryAlert">
           <ion-icon :icon="add"></ion-icon>
         </ion-fab-button>
       </ion-fab>
@@ -418,13 +429,6 @@ async function setNote(noteId:any) {
 
       </NoteContentEditor>
     </div>
-
-    <ion-alert
-        trigger="create-category-button"
-        header="Create New Note Category"
-        :buttons="finalizeCategoryButton"
-        :inputs="finalizeCategoryInputs"
-    ></ion-alert>
 
     <ion-alert
         ref="manageCategoryAlert"

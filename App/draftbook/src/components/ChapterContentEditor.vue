@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {IonButton, IonIcon} from "@ionic/vue";
-import { QuillEditor } from '@vueup/vue-quill'
+import {IonButton, IonIcon, IonSpinner} from "@ionic/vue";
+import {QuillEditor} from '@vueup/vue-quill'
 import '@/theme/customQuillSnow.css'
 import {addIcons} from "ionicons";
-import {chevronExpand, expand, save} from "ionicons/icons";
-import {ref, watch, watchEffect} from "vue";
+import {checkmarkCircle, expand, save} from "ionicons/icons";
+import {ref, watchEffect} from "vue";
 import {useAuth0} from "@auth0/auth0-vue";
 import {API_URL} from "@/localConfig";
-import {applyPatches, makePatches, parsePatch, stringifyPatches} from "@sanity/diff-match-patch";
+import {makePatches, stringifyPatches} from "@sanity/diff-match-patch";
 
 addIcons({save, expand});
 
@@ -15,6 +15,7 @@ let quillOptions = {
   placeholder: "Your ideas begin here..."
 }
 let quillEditor = ref();
+let saveTimer = ref(0);
 
 //auth
 const {getAccessTokenSilently} = useAuth0();
@@ -26,6 +27,7 @@ watchEffect(() => {
   refreshContent();
 })
 const emit = defineEmits(['doToast', 'toggleFocus']);
+defineExpose({saveContent});
 
 /**
  * Refresh our content from the server's version of the chapter.
@@ -59,6 +61,7 @@ async function refreshContent() {
  */
 async function saveContent() {
   if (chapterId == -1) return;
+
   let content = quillEditor.value.getHTML();
 
   let patches = stringifyPatches(makePatches(oldContent, content));
@@ -79,6 +82,10 @@ async function saveContent() {
     emit("doToast", "Failed to save chapter content.");
   } else {
     oldContent = content;
+    saveTimer.value = 1000;
+    setTimeout(() => {
+      saveTimer.value = 0;
+    }, saveTimer.value);
   }
 }
 
@@ -130,7 +137,8 @@ async function toggleFocus() {
             <ion-icon slot="icon-only" :icon="expand"></ion-icon>
           </ion-button>
           <ion-button id="save-button" fill="clear" @click="saveContent">
-            <ion-icon slot="icon-only" :icon="save"></ion-icon>
+            <ion-icon v-if="saveTimer == 0" slot="icon-only" :icon="save"></ion-icon>
+            <ion-icon v-if="saveTimer != 0" slot="icon-only" :icon="checkmarkCircle"></ion-icon>
           </ion-button>
         </div>
       </div>

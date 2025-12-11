@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {expand, save} from "ionicons/icons";
+import {checkmarkCircle, expand, save} from "ionicons/icons";
 import {QuillEditor} from "@vueup/vue-quill";
 import {IonButton, IonIcon} from "@ionic/vue";
 import {ref, watchEffect} from "vue";
@@ -11,6 +11,7 @@ let quillOptions = {
   placeholder: "Take a note..."
 }
 let quillEditor = ref();
+let saved = ref(<boolean>false);
 
 //auth
 const {getAccessTokenSilently} = useAuth0();
@@ -20,6 +21,7 @@ watchEffect(() => {
   refreshContent();
 })
 const emit = defineEmits(['doToast', 'toggleFocus']);
+defineExpose({saveContent})
 
 /**
  * Refresh our note content based on the content in the server
@@ -69,6 +71,10 @@ async function saveContent() {
     emit("doToast", "Failed to save note content.");
     return;
   }
+  saved.value = true;
+  setTimeout(() => {
+    saved.value = false;
+  }, 1000);
 }
 
 async function toggleFocus() {
@@ -109,7 +115,8 @@ async function toggleFocus() {
             <ion-icon slot="icon-only" :icon="expand"></ion-icon>
           </ion-button>
           <ion-button id="save-button" fill="clear" @click="saveContent">
-            <ion-icon slot="icon-only" :icon="save"></ion-icon>
+            <ion-icon v-if="!saved" slot="icon-only" :icon="save"></ion-icon>
+            <ion-icon v-if="saved" slot="icon-only" :icon="checkmarkCircle"></ion-icon>
           </ion-button>
         </div>
       </div>

@@ -38,8 +38,5 @@ Built as a portfolio project by Joseph Kopecky.
 * Focus mode for chapters and notes, allowing you to full-screen notes as well
 
 ## Planned Features
-* Reorder chapters
-* Style/design improvement pass
 * Account page (assess requirements)
 * Home/intro page
-* Deployment

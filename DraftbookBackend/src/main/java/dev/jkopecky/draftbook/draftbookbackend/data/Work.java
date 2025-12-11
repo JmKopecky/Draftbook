@@ -156,7 +156,9 @@ public class Work {
         }
 
         //delete all noteCategories associated with this work.
-        noteCategoryRepository.deleteAll(noteCategoryRepository.findAllByWorkId(id));
+        for (NoteCategory noteCategory : noteCategoryRepository.findAllByWorkId(id)) {
+            noteCategory.forceDelete(noteCategoryRepository, noteRepository);
+        }
 
         //delete this work
         workRepository.delete(this);

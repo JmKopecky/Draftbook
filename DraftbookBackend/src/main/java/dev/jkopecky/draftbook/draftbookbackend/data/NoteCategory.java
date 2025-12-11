@@ -128,6 +128,17 @@ public class NoteCategory {
         return true;
     }
 
+    /**
+     * Forces the deletion of this noteCategory, regardless of whether this is for chapter notes.
+     * @param noteCategoryRepository The table containing noteCategories.
+     * @param noteRepository The table containing notes.
+     */
+    public void forceDelete(NoteCategoryRepository noteCategoryRepository, NoteRepository noteRepository) {
+        getNotes(noteRepository).forEach(note -> note.delete(noteRepository));
+        noteCategoryRepository.delete(this);
+    }
+
+
     public int getId() {
         return id;
     }

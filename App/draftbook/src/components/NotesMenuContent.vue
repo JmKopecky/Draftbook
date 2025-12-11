@@ -1,6 +1,8 @@
 <script setup lang="ts">
 
 import {
+  IonAccordion,
+  IonAccordionGroup,
   IonAlert,
   IonButton,
   IonButtons,
@@ -9,31 +11,21 @@ import {
   IonFabButton,
   IonHeader,
   IonIcon,
-  IonTitle,
-  IonToolbar,
-  IonLabel,
+  IonInput,
   IonItem,
+  IonItemOption,
+  IonItemOptions,
+  IonItemSliding,
+  IonLabel,
   IonList,
-  IonAccordion,
-  IonAccordionGroup,
-  IonInput, IonItemOption, IonItemOptions, IonItemSliding
+  IonTitle,
+  IonToolbar
 } from "@ionic/vue";
-import {
-  add,
-  addCircle,
-  caretBack,
-  caretForward,
-  chevronExpand, create,
-  folderOpen,
-  pencil,
-  settings,
-  trash
-} from "ionicons/icons";
+import {add, addCircle, caretBack, caretForward, create, folderOpen, pencil, settings, trash} from "ionicons/icons";
 import {API_URL} from "@/localConfig";
 import {useAuth0} from "@auth0/auth0-vue";
 import {ref} from "vue";
 import {presentToast} from "@/UtilFunctions";
-import ChapterContentEditor from "@/components/ChapterContentEditor.vue";
 import NoteContentEditor from "@/components/NoteContentEditor.vue";
 
 const {notes, workId} =
@@ -53,6 +45,7 @@ let createNoteInputRef:any = ref([]);
 let noteSlidingRef = new Array(notes.length);
 let isNoteNavOpen = ref(<boolean>true);
 let currentNote = ref(-1);
+let noteEditor = ref();
 
 //alert elements
 const finalizeCategoryButton = [{
@@ -320,13 +313,17 @@ async function renameNote(noteName:string, noteId:any) {
  */
 function toggleNoteNav() {
   isNoteNavOpen.value = !isNoteNavOpen.value;
+  if (isNoteNavOpen.value) {
+    noteEditor?.value?.saveContent();
+  }
 }
 
 /**
  * Sets the current note to be displayed.
  * @param noteId The id of the note to display.
  */
-function setNote(noteId:any) {
+async function setNote(noteId:any) {
+  await noteEditor?.value?.saveContent();
   currentNote.value = noteId;
   toggleNoteNav();
 }
@@ -344,7 +341,7 @@ function setNote(noteId:any) {
       </ion-buttons>
       <ion-buttons slot="end">
         <ion-button fill="clear" @click="toggleNoteNav()">
-          <ion-icon :icon="create" size="large" v-if="isNoteNavOpen"></ion-icon>
+          <ion-icon :icon="create" size="large" v-if="isNoteNavOpen && currentNote != -1"></ion-icon>
           <ion-icon :icon="folderOpen" size="large" v-if="!isNoteNavOpen"></ion-icon>
         </ion-button>
       </ion-buttons>
@@ -415,7 +412,7 @@ function setNote(noteId:any) {
     </div>
 
     <div id="note-edit-container" v-if="!isNoteNavOpen">
-      <NoteContentEditor :note-id="currentNote" :work-id="workId"
+      <NoteContentEditor :note-id="currentNote" :work-id="workId" ref="noteEditor"
                          @do-toast="presentToast"
                          @toggle-focus="(val) => emit('toggleFocus', val)">
 

@@ -1,19 +1,24 @@
 <script setup lang="ts">
 
-import {add, caretBack, caretForward, chevronExpand, menu, pencil, trash} from "ionicons/icons";
+import {add, caretBack, caretForward, chevronExpand, pencil, trash} from "ionicons/icons";
 import {
+  alertController,
   IonAlert,
   IonButton,
-  IonButtons,
+  IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardTitle,
   IonContent,
-  IonFab, IonFabButton,
+  IonFab,
+  IonFabButton,
   IonHeader,
   IonIcon,
   IonItem,
-  IonItemOption, IonItemOptions,
-  IonItemSliding, IonLabel,
-  IonList, IonMenu,
-  IonTitle, IonToolbar, menuController, onIonViewWillEnter
+  IonItemOption,
+  IonItemOptions,
+  IonItemSliding,
+  IonLabel,
+  IonList,
+  IonTitle,
+  IonToolbar
 } from "@ionic/vue";
 import {addIcons} from "ionicons";
 import {useAuth0} from "@auth0/auth0-vue";
@@ -184,6 +189,19 @@ async function deleteChapter(chapterId:string) {
   emit("reloadNotes");
 }
 
+/**
+Open the create chapter menu
+ **/
+async function openCreateChapterMenu() {
+  const alert = await alertController.create({
+    header: 'Create New Chapter',
+    buttons: finalizeChapterButtons,
+    inputs: createChapterInputs
+  });
+
+  await alert.present();
+}
+
 </script>
 
 <template>
@@ -221,7 +239,7 @@ async function deleteChapter(chapterId:string) {
         @didDismiss="() => isRenameAlertOpen = false"
     ></ion-alert>
 
-    <ion-list>
+    <ion-list v-if="chapters !== undefined && chapters.length !== 0">
       <ion-item-sliding v-for="(chapter, index) in chapters"
                         :key="chapter['number']"
                         :ref="element => chapterSlidingRef[index] = element"
@@ -245,9 +263,24 @@ async function deleteChapter(chapterId:string) {
         </ion-item-options>
       </ion-item-sliding>
     </ion-list>
+
+    <ion-card v-if="chapters === undefined || chapters.length === 0" id="no-chapters-card">
+      <ion-card-header>
+        <ion-card-title>You have no chapters</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button @click="openCreateChapterMenu">Create New Chapter</ion-button>
+      </ion-card-content>
+    </ion-card>
   </ion-content>
 </template>
 
 <style scoped>
-
+ion-card#no-chapters-card {
+  width: fit-content;
+  max-width: 90%;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
 </style>

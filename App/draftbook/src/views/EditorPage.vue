@@ -1,20 +1,11 @@
 <script setup lang="ts">
 
 import {
-  IonAlert,
   IonButton,
-  IonButtons,
+  IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonHeader,
   IonIcon,
-  IonItem,
-  IonItemOption,
-  IonItemOptions,
-  IonItemSliding,
-  IonLabel,
-  IonList,
   IonMenu,
   IonPage,
   IonSplitPane,
@@ -46,6 +37,7 @@ import {presentToast} from "@/UtilFunctions";
 import ChapterContentEditor from "@/components/ChapterContentEditor.vue";
 import ChapterMenuContent from "@/components/ChapterMenuContent.vue";
 import NotesMenuContent from "@/components/NotesMenuContent.vue";
+import LoginButton from "@/components/LoginButton.vue";
 
 addIcons({menu, apps, chevronBack, chevronForward, trash, open, caretBack, chevronExpand, pencil, add, caretForward});
 
@@ -59,6 +51,7 @@ let splitPaneVisible:boolean = window.matchMedia(splitPaneBreakpoint).matches;
 let currentChapter = ref(-1);
 const chapterMenuId = "chapter-menu";
 const noteMenuId = "notes-menu";
+let chapterEditor:any = ref();
 
 //auth
 const {getAccessTokenSilently} = useAuth0();
@@ -189,6 +182,7 @@ async function updateOnSplitPaneChange(event:any) {
  * @param id The chapter to select.
  */
 async function selectChapter(id:any) {
+  await chapterEditor?.value?.saveContent();
   currentChapter.value = id;
   if (!splitPaneVisible) {
     toggleMenu(chapterMenuId);
@@ -201,7 +195,6 @@ function handleToggleFocus(target:string) {
   let chapterContentContainer = chapterContent?.parentElement?.parentElement;
   let noteContent = document.getElementById("note-edit-container");
   let noteContentContainer = noteContent?.parentElement?.parentElement;
-  console.log(noteContent);
 
   if (chapterContentContainer?.classList.contains(focusedIndicator)
       || noteContentContainer?.classList.contains(focusedIndicator)) {
@@ -257,12 +250,20 @@ function handleToggleFocus(target:string) {
           </ion-toolbar>
         </ion-header>
 
-        <ion-content>
-          <ChapterContentEditor id="chapter-content-editor"
+        <ion-content :class="{noChapter: currentChapter == -1}">
+          <ChapterContentEditor id="chapter-content-editor" ref="chapterEditor"
                                 :chapter-id="currentChapter" :work-id="workId"
                                 @do-toast="presentToast" @toggleFocus="handleToggleFocus">
 
           </ChapterContentEditor>
+          <div id="centerer" v-if="currentChapter == -1">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>Chapter Editing Panel</ion-card-title>
+                <ion-card-subtitle>Select a chapter to edit from the left menu.</ion-card-subtitle>
+              </ion-card-header>
+            </ion-card>
+          </div>
         </ion-content>
       </ion-page>
     </ion-split-pane>
@@ -271,4 +272,22 @@ function handleToggleFocus(target:string) {
 
 <style scoped>
 
+
+#centerer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  position: fixed;
+  top: 0;
+}
+ion-card {
+  width: fit-content;
+  max-width: 90%;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
 </style>

@@ -115,3 +115,12 @@ ion-menu.focused, #main.focused {
         display: none;
     }
 }
+ion-menu.focused::part(container) {
+    width: 100%;
+}
+
+ion-content.noChapter {
+    #toolbar, #chapter-content-editor {
+        visibility: hidden;
+    }
+}

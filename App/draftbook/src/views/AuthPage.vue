@@ -10,11 +10,10 @@ import LoginButton from "@/components/LoginButton.vue";
       <div id="auth-content-centerer">
         <ion-card>
           <ion-card-header>
-            <ion-card-subtitle>Welcome to...</ion-card-subtitle>
-            <ion-card-title>Draftbook!</ion-card-title>
+            <ion-card-title>Welcome to Draftbook</ion-card-title>
+            <ion-card-subtitle>Your new tool for getting writing done.</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            <h3>Let's get you set up.</h3>
             <login-button/>
           </ion-card-content>
         </ion-card>
@@ -31,10 +30,11 @@ import LoginButton from "@/components/LoginButton.vue";
   gap: 1em;
   width: 100%;
   height: 100%;
+  text-align: center;
 }
 ion-card {
-  width: 100%;
-  max-width: 400px;
+  width: fit-content;
+  max-width: 90%;
   display: flex;
   flex-flow: column;
   align-items: center;

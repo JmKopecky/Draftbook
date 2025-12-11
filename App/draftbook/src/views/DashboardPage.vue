@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import {
+  alertController,
   IonAlert,
-  IonButtons,
+  IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
   IonContent,
   IonFab,
   IonFabButton,
@@ -22,6 +23,7 @@ import {addIcons} from 'ionicons';
 import {add} from 'ionicons/icons';
 import ManageWorkModal from "@/components/ManageWorkModal.vue";
 import {presentToast} from "@/UtilFunctions";
+import LoginButton from "@/components/LoginButton.vue";
 
 addIcons({add});
 
@@ -47,7 +49,7 @@ const createWorkInputs = [
 const {getAccessTokenSilently} = useAuth0();
 
 //refs
-const works = ref();
+const works:any = ref([]);
 
 /**
  * A computed parameter for determining if any works are shown.
@@ -78,7 +80,7 @@ async function reloadWorks() {
     if (data.length !== 0) {
       works.value = data;
     } else {
-      presentToast("You currently have no works.");
+      works.value = [];
     }
   } else {
     presentToast("Failed to parse retrieved works.");
@@ -124,6 +126,20 @@ async function openWorkManager(work:object) {
   });
 }
 
+/**
+ * Open the create work alert.
+ */
+async function openCreateFirstWorkAlert() {
+  const alert = await alertController.create({
+    header: 'Create Your First Work',
+    message: 'Your big idea begins now.',
+    buttons: finalizeWorkButtons,
+    inputs: createWorkInputs
+  });
+
+  await alert.present();
+}
+
 onIonViewWillEnter(reloadWorks);
 
 </script>
@@ -133,31 +149,47 @@ onIonViewWillEnter(reloadWorks);
     <ion-header>
       <ion-toolbar>
         <ion-title>Dashboard</ion-title>
-        <ion-buttons slot="end">
-          <AccountButton></AccountButton>
-        </ion-buttons>
+<!--        <ion-buttons slot="end">-->
+<!--          <AccountButton></AccountButton>-->
+<!--        </ion-buttons>-->
       </ion-toolbar>
     </ion-header>
     <ion-content>
 
-      <div id="works-tile-container" v-if="worksExist">
+      <div id="works-tile-container">
         <WorkTile v-for="work in works" :work="work"
                   @manage-work="openWorkManager"
                   @do-toast="presentToast"
                   @refresh="reloadWorks">
         </WorkTile>
+        <ion-card v-if="!worksExist" id="no-works-card">
+          <ion-card-header>
+            <ion-card-title>You have no works</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-button @click="openCreateFirstWorkAlert">Create New Work</ion-button>
+          </ion-card-content>
+        </ion-card>
       </div>
 
       <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-        <ion-fab-button id="create-work-button">
+        <ion-fab-button id="create-work-fab">
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
       </ion-fab>
 
       <ion-alert
-          trigger="create-work-button"
+          trigger="create-work-fab"
           header="Create New Work"
           message="Your next big idea begins now."
+          :buttons="finalizeWorkButtons"
+          :inputs="createWorkInputs"
+      ></ion-alert>
+
+      <ion-alert
+          trigger="create-first-work-button"
+          header="Create Your First Work"
+          message="Your big idea begins now."
           :buttons="finalizeWorkButtons"
           :inputs="createWorkInputs"
       ></ion-alert>
@@ -166,4 +198,15 @@ onIonViewWillEnter(reloadWorks);
 </template>
 
 <style scoped>
+ion-card#no-works-card {
+  width: fit-content;
+  max-width: 90%;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 </style>

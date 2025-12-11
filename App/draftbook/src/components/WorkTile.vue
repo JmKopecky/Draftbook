@@ -46,8 +46,8 @@ async function deleteWork() {
     emit('doToast', "Failed to delete work.");
   } else {
     emit('doToast', "Deleted work successfully.");
-    emit('refresh');
   }
+  emit('refresh');
 }
 </script>
 

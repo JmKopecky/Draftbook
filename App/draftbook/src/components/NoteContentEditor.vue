@@ -7,11 +7,14 @@ import {ref, watchEffect} from "vue";
 import {useAuth0} from "@auth0/auth0-vue";
 import {API_URL} from "@/localConfig";
 
+const secondsBetweenAutosave = 3;
+
 let quillOptions = {
   placeholder: "Take a note..."
 }
 let quillEditor = ref();
 let saved = ref(<boolean>false);
+let isAutosaving = false;
 
 //auth
 const {getAccessTokenSilently} = useAuth0();
@@ -22,6 +25,8 @@ watchEffect(() => {
 })
 const emit = defineEmits(['doToast', 'toggleFocus']);
 defineExpose({saveContent})
+
+
 
 /**
  * Refresh our note content based on the content in the server
@@ -77,15 +82,32 @@ async function saveContent() {
   }, 1000);
 }
 
+/**
+ * When focus is toggled, save content before swapping focus.
+ */
 async function toggleFocus() {
   await saveContent();
   emit("toggleFocus", "note");
 }
 
+/**
+ * Prepare an attempt to autosave content later, buffering for multiple quick attempts.
+ */
+function tryAutosave() {
+  if (!isAutosaving) {
+    isAutosaving = true;
+    setTimeout(() => {
+      saveContent();
+      isAutosaving = false;
+    }, secondsBetweenAutosave * 1000);
+  }
+}
+
 </script>
 
 <template>
-  <QuillEditor theme="snow" toolbar="#toolbar" :options="quillOptions" ref="quillEditor">
+  <QuillEditor theme="snow" toolbar="#toolbar" :options="quillOptions"
+               ref="quillEditor" @update:content="tryAutosave">
     <template #toolbar>
       <div id="toolbar">
         <div id="toolbar-first">
@@ -98,6 +120,12 @@ async function toggleFocus() {
           <span class="ql-formats">
             <button class="ql-script" value="sub"></button>
           <button class="ql-script" value="super"></button>
+          </span>
+          <span class="ql-formats">
+            <button class="ql-blockquote"></button>
+            <select class="ql-header"></select>
+            <select class="ql-align"></select>
+            <select class="ql-color"></select>
           </span>
           <span class="ql-formats">
             <button class="ql-list" value="ordered"></button>

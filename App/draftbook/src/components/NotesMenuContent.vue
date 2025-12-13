@@ -359,7 +359,7 @@ async function openCreateCategoryAlert() {
     </ion-toolbar>
   </ion-header>
 
-  <ion-content class="ion-padding">
+  <ion-content>
 
     <div id="note-nav-container" v-if="isNoteNavOpen">
       <ion-fab slot="fixed" vertical="bottom" horizontal="start">

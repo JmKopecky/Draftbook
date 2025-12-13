@@ -10,7 +10,7 @@
 }
 .ql-editor {
     box-sizing: border-box;
-    line-height: 1.42;
+    line-height: 1.638;
     height: 100%;
     outline: none;
     overflow-y: auto;
@@ -39,7 +39,7 @@
     counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
 }
 .ql-editor p {
-    font-size: 1.1em;
+    font-size: 1.17em;
 }
 .ql-editor.ql-blank::before {
     color: var(--ion-color-light);
@@ -78,6 +78,7 @@
 .ql-editor ol > li,
 .ql-editor ul > li {
     list-style-type: none;
+    font-size: 1.17em;
 }
 .ql-editor ul > li::before {
     content: '\2022';
@@ -826,6 +827,10 @@
     box-sizing: border-box;
     font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
     padding: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: var(--ion-background-color);
 }
 .ql-toolbar.ql-snow .ql-formats {
     margin-right: 15px;

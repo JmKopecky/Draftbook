@@ -11,11 +11,14 @@ import {makePatches, stringifyPatches} from "@sanity/diff-match-patch";
 
 addIcons({save, expand});
 
+const secondsBetweenAutosave = 3;
+
 let quillOptions = {
   placeholder: "Your ideas begin here..."
 }
 let quillEditor = ref();
 let saveTimer = ref(0);
+let isAutosaving = false;
 
 //auth
 const {getAccessTokenSilently} = useAuth0();
@@ -89,15 +92,32 @@ async function saveContent() {
   }
 }
 
+/**
+ * When focus is toggled, save content before swapping focus.
+ */
 async function toggleFocus() {
   await saveContent();
   emit("toggleFocus", "chapter");
 }
 
+/**
+ * Prepare an attempt to autosave content later, buffering for multiple quick attempts.
+ */
+function tryAutosave() {
+  if (!isAutosaving) {
+    isAutosaving = true;
+    setTimeout(() => {
+      saveContent();
+      isAutosaving = false;
+    }, secondsBetweenAutosave * 1000);
+  }
+}
+
 </script>
 
 <template>
-  <QuillEditor theme="snow" toolbar="#toolbar" :options="quillOptions" ref="quillEditor">
+  <QuillEditor theme="snow" toolbar="#toolbar" :options="quillOptions"
+               ref="quillEditor" @update:content="tryAutosave">
     <template #toolbar>
       <div id="toolbar">
         <div id="toolbar-first">
@@ -115,6 +135,7 @@ async function toggleFocus() {
             <button class="ql-blockquote"></button>
             <select class="ql-header"></select>
             <select class="ql-align"></select>
+            <select class="ql-color"></select>
           </span>
           <span class="ql-formats">
             <button class="ql-list" value="ordered"></button>

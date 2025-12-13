@@ -6,6 +6,7 @@ import {authGuard} from "@auth0/auth0-vue";
 import CallbackPage from "@/views/CallbackPage.vue";
 import EditorPage from "@/views/EditorPage.vue";
 
+
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
@@ -17,6 +18,10 @@ const routes: Array<RouteRecordRaw> = [
     },
     {
         path: '/authenticate',
+        component: CallbackPage
+    },
+    {
+        path: '/:*/capacitor/:*',
         component: CallbackPage
     },
     {

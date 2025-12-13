@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 @SpringBootApplication
@@ -35,7 +36,14 @@ public class DraftbookBackendApplication {
     @Bean
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8100", "https://draftbook.jkopecky.dev"));
+        ArrayList<String> origins = new ArrayList<>();
+        origins.add("http://localhost:8100");
+        origins.add("http://localhost");
+        origins.add("https://localhost:8100");
+        origins.add("https://localhost");
+        origins.add("capacitor://localhost");
+        origins.add("https://draftbook.jkopecky.dev");
+        configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(Arrays.asList("GET","POST", "OPTIONS", "DELETE", "PUT"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "*"));
         configuration.setAllowCredentials(true);

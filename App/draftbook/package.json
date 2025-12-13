@@ -15,6 +15,7 @@
     "@auth0/auth0-vue": "^2.4.0",
     "@capacitor/android": "^8.0.0",
     "@capacitor/app": "^8.0.0",
+    "@capacitor/browser": "^8.0.0",
     "@capacitor/core": "^8.0.0",
     "@capacitor/haptics": "^8.0.0",
     "@capacitor/keyboard": "^8.0.0",
@@ -28,6 +29,7 @@
     "vue-router": "^4.2.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.0.0",
     "@vitejs/plugin-legacy": "^5.0.0",
     "@vitejs/plugin-vue": "^4.0.0",

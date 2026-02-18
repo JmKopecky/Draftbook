@@ -3,11 +3,12 @@ import {IonButton, IonIcon, IonSpinner} from "@ionic/vue";
 import {QuillEditor} from '@vueup/vue-quill'
 import '@/theme/customQuillSnow.css'
 import {addIcons} from "ionicons";
-import {checkmarkCircle, expand, save} from "ionicons/icons";
+import {checkmarkCircle, clipboard, expand, save} from "ionicons/icons";
 import {ref, watchEffect} from "vue";
 import {useAuth0} from "@auth0/auth0-vue";
 import {API_URL} from "@/localConfig";
 import {makePatches, stringifyPatches} from "@sanity/diff-match-patch";
+import { Clipboard } from '@capacitor/clipboard';
 
 addIcons({save, expand});
 
@@ -113,6 +114,16 @@ function tryAutosave() {
   }
 }
 
+/**
+ * Copy contents of the editor to clipboard as HTML
+ */
+function copyContentToClipboard() {
+  let html = quillEditor.value.getHTML();
+  Clipboard.write({
+    string: html
+  });
+}
+
 </script>
 
 <template>
@@ -154,6 +165,9 @@ function tryAutosave() {
         </div>
 
         <div id="toolbar-second">
+          <ion-button id="copy-button" fill="clear" @click="copyContentToClipboard">
+            <ion-icon slot="icon-only" :icon="clipboard"></ion-icon>
+          </ion-button>
           <ion-button id="focus-button" fill="clear" @click="toggleFocus">
             <ion-icon slot="icon-only" :icon="expand"></ion-icon>
           </ion-button>

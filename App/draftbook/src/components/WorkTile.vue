@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import {IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon} from "@ionic/vue";
-import {pencil, trash} from "ionicons/icons";
+import {IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon, IonInput} from "@ionic/vue";
+import {checkmarkCircle, close, pencil, trash} from "ionicons/icons";
 import {addIcons} from "ionicons";
 import router from "@/router";
 import {useAuth0} from "@auth0/auth0-vue";
 import {API_URL} from "@/localConfig";
+import {ref} from "vue";
 
 addIcons({pencil, trash});
 
@@ -17,6 +18,9 @@ const emit = defineEmits(['doToast', 'refresh', 'manageWork']);
 //props
 const props = defineProps(['work']);
 const chapters = props.work["chapterCount"];
+
+let pendingDeletion = ref(<boolean>false);
+let deletionCheckInput = ref();
 
 /**
  * Redirect to the page for the specific work.
@@ -49,10 +53,29 @@ async function deleteWork() {
   }
   emit('refresh');
 }
+
+/**
+ * Convert this tile to pending deletion mode, asking the user to confirm.
+ */
+async function toggleDeletion() {
+  pendingDeletion.value = !pendingDeletion.value;
+}
+
+async function tryDeletion() {
+  let code = deletionCheckInput.value.$el.value;
+  let title = props.work['title'];
+  if (code === title) {
+    await deleteWork();
+  } else {
+    emit('doToast', "Incorrect title - deletion failed.");
+  }
+  toggleDeletion();
+}
+
 </script>
 
 <template>
-  <ion-card>
+  <ion-card v-if="!pendingDeletion">
     <ion-card-header>
       <ion-card-title>{{props.work['title']}}</ion-card-title>
     </ion-card-header>
@@ -64,8 +87,27 @@ async function deleteWork() {
       <ion-icon name="pencil"></ion-icon>
     </ion-button>
     <ion-button fill="clear" @click="$emit('manageWork', props.work)">Manage</ion-button>
-    <ion-button fill="clear" @click="deleteWork">
+    <ion-button fill="clear" @click="toggleDeletion">
       <ion-icon name="trash"></ion-icon>
+    </ion-button>
+  </ion-card>
+  <ion-card v-if="pendingDeletion">
+    <ion-card-header>
+      <ion-card-title>{{props.work['title']}}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Are you sure you want to delete this work?
+
+      <ion-input label="Confirm deletion: "
+                 placeholder="Type the title of this work to delete."
+                 :ref="element => deletionCheckInput = element"></ion-input>
+    </ion-card-content>
+
+    <ion-button @click="tryDeletion">
+      <ion-icon :icon="checkmarkCircle"></ion-icon>
+    </ion-button>
+    <ion-button @click="toggleDeletion">
+      <ion-icon :icon="close"></ion-icon>
     </ion-button>
   </ion-card>
 </template>

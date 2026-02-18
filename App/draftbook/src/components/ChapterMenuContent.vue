@@ -35,6 +35,8 @@ const emit = defineEmits(['doToast', 'selectChapter',
 let isRenameAlertOpen:any = ref(<boolean>false)
 let renameAlert = ref();
 let chapterSlidingRef:any = ref([]);
+let deleteChapterAlert = ref();
+let isDeleteChapterAlertOpen:any = ref(<boolean>false);
 
 //auth
 const {getAccessTokenSilently} = useAuth0();
@@ -85,6 +87,14 @@ const renameChapterInputs = [
     },
   }
 ];
+const deleteChapterButtons = [{
+  text: 'Delete',
+  role: 'confirm',
+  handler: (alert:any) => {
+    let chapterId = deleteChapterAlert.value.$el.getAttribute("data-chapterid");
+    deleteChapter(chapterId);
+  },
+}];
 
 /**
  * Send a request to the server to create the chapter.
@@ -202,6 +212,16 @@ async function openCreateChapterMenu() {
   await alert.present();
 }
 
+/**
+ * Opens the menu to delete a given chapter.
+ * @param chapterId The chapter to delete.
+ */
+async function openDeleteChapterMenu(chapterId:any) {
+  isDeleteChapterAlertOpen.value = true;
+  let alertElem = deleteChapterAlert.value.$el;
+  alertElem.setAttribute("data-chapterid", chapterId);
+}
+
 </script>
 
 <template>
@@ -257,7 +277,7 @@ async function openCreateChapterMenu() {
           <ion-item-option color="tertiary" @click.stop="openRenameChapterMenu(chapter['id'])">
             <ion-icon slot="icon-only" :icon="pencil"></ion-icon>
           </ion-item-option>
-          <ion-item-option color="danger" @click.stop="deleteChapter(chapter['id'])">
+          <ion-item-option color="danger" @click.stop="openDeleteChapterMenu(chapter['id'])">
             <ion-icon slot="icon-only" :icon="trash"></ion-icon>
           </ion-item-option>
         </ion-item-options>
@@ -272,6 +292,14 @@ async function openCreateChapterMenu() {
         <ion-button @click="openCreateChapterMenu">Create New Chapter</ion-button>
       </ion-card-content>
     </ion-card>
+
+    <ion-alert
+        ref="deleteChapterAlert"
+        :isOpen="isDeleteChapterAlertOpen"
+        header="Confirm Deletion?"
+        :buttons="deleteChapterButtons"
+        @didDismiss="() => isDeleteChapterAlertOpen = false"
+    ></ion-alert>
   </ion-content>
 </template>
 

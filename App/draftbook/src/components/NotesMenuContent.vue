@@ -40,6 +40,8 @@ let isManageCategoryAlertOpen:any = ref(<boolean>false)
 let manageCategoryAlert = ref();
 let isRenameNoteAlertOpen:any = ref(<boolean>false);
 let renameNoteAlert = ref();
+let deleteNoteAlert = ref();
+let isDeleteNoteAlertOpen:any = ref(<boolean>false);
 let focusedCategory = ref("null");
 const chapterNotesName = 'Chapter Notes';
 let createNoteInputRef:any = ref([]);
@@ -113,6 +115,14 @@ const renameNoteInputs = [
     },
   }
 ];
+const deleteNoteButtons = [{
+  text: 'Delete',
+  role: 'confirm',
+  handler: (alert:any) => {
+    let noteId = deleteNoteAlert.value.$el.getAttribute("data-noteid");
+    deleteNote(noteId);
+  },
+}];
 
 /**
  * Create a new noteCategory for the current work.
@@ -225,11 +235,25 @@ async function toggleNoteOptionMenu(catIndex:any, noteIndex:any) {
   }
 }
 
-//todo implement
+/**
+ * Opens the menu to rename a given note.
+ * @param noteId The note to rename.
+ * @param noteName The current name of the note.
+ */
 async function openRenameNoteMenu(noteId:any, noteName:any) {
   isRenameNoteAlertOpen.value = true;
   let alertElem = renameNoteAlert.value.$el;
   alertElem.querySelector(".alert-input").value = noteName;
+  alertElem.setAttribute("data-noteid", noteId);
+}
+
+/**
+ * Opens the menu to delete a given note.
+ * @param noteId The note to delete.
+ */
+async function openDeleteNoteMenu(noteId:any) {
+  isDeleteNoteAlertOpen.value = true;
+  let alertElem = deleteNoteAlert.value.$el;
   alertElem.setAttribute("data-noteid", noteId);
 }
 
@@ -402,7 +426,7 @@ async function openCreateCategoryAlert() {
                 <ion-item-option color="tertiary" @click.stop="openRenameNoteMenu(noteIdentifier['id'], noteIdentifier['descriptor'])">
                   <ion-icon slot="icon-only" :icon="pencil"></ion-icon>
                 </ion-item-option>
-                <ion-item-option color="danger" @click.stop="deleteNote(noteIdentifier['id'])">
+                <ion-item-option color="danger" @click.stop="openDeleteNoteMenu(noteIdentifier['id'])">
                   <ion-icon slot="icon-only" :icon="trash"></ion-icon>
                 </ion-item-option>
               </ion-item-options>
@@ -426,7 +450,6 @@ async function openCreateCategoryAlert() {
       <NoteContentEditor :note-id="currentNote" :work-id="workId" ref="noteEditor"
                          @do-toast="presentToast"
                          @toggle-focus="(val) => emit('toggleFocus', val)">
-
       </NoteContentEditor>
     </div>
 
@@ -446,6 +469,14 @@ async function openCreateCategoryAlert() {
         :buttons="renameNoteButtons"
         :inputs="renameNoteInputs"
         @didDismiss="() => isRenameNoteAlertOpen = false"
+    ></ion-alert>
+
+    <ion-alert
+        ref="deleteNoteAlert"
+        :isOpen="isDeleteNoteAlertOpen"
+        header="Confirm Deletion?"
+        :buttons="deleteNoteButtons"
+        @didDismiss="() => isDeleteNoteAlertOpen = false"
     ></ion-alert>
 
   </ion-content>

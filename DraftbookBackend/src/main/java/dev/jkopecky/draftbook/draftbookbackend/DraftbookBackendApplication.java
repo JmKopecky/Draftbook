@@ -43,6 +43,7 @@ public class DraftbookBackendApplication {
         origins.add("https://localhost");
         origins.add("capacitor://localhost");
         origins.add("https://draftbook.jkopecky.dev");
+        origins.add("https://draftbook.iriskopecky.com");
         configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(Arrays.asList("GET","POST", "OPTIONS", "DELETE", "PUT"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "*"));
